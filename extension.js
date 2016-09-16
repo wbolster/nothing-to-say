@@ -1,8 +1,64 @@
 const Gio = imports.gi.Gio;
-const St = imports.gi.St;
+const Gvc = imports.gi.Gvc;
+const Lang = imports.lang;
 const Main = imports.ui.main;
+const Signals = imports.signals;
+const St = imports.gi.St;
 
 
+
+const Microphone = new Lang.Class({
+  Name: 'Microphone',
+
+  _init: function() {
+    this.active = false;
+    this.stream = null;
+
+    this.mixer_control = new Gvc.MixerControl({name: 'Nothing to say'});
+    this.mixer_control.open();
+
+    this.mixer_control.connect(
+      'default-source-changed',
+      Lang.bind(this, this.update));
+    this.mixer_control.connect(
+      'stream-added',
+      Lang.bind(this, this.update));
+    this.mixer_control.connect(
+      'stream-removed',
+      Lang.bind(this, this.update));
+
+    this.update();
+  },
+
+  update: function() {
+    // based on gnome-shell volume control
+    this.stream = this.mixer_control.get_default_source();
+    this.active = false;
+    if (this.stream) {
+      let recording_apps = this.mixer_control.get_source_outputs();
+      for (let i = 0; i < recording_apps.length; i++) {
+        let outputStream = recording_apps[i];
+        let id = outputStream.get_application_id();
+        if (!id || (id != 'org.gnome.VolumeControl' && id != 'org.PulseAudio.pavucontrol')) {
+          this.active = true;
+        }
+      }
+    }
+    this.emit('state-changed');
+  },
+
+  get muted() {
+    return this.stream && this.stream.is_muted;
+  },
+
+  set muted(muted) {
+    this.stream.change_is_muted(muted);
+  }
+});
+Signals.addSignalMethods(Microphone.prototype);
+
+
+let microphone;
 let button, icon;
 
 function get_stream() {
@@ -21,20 +77,46 @@ function update_icon(muted) {
   }
 }
 
-function show_hello() {
-  let stream = get_stream();
-  if (!stream)
-    return;
-  let muting = !stream.is_muted;
-  stream.change_is_muted(muting);
-  update_icon(muting);
-  let text = muting ? "Microphone muted" : "Microphone unmuted";
-  let icon_name = muting ? 'microphone-sensitivity-muted-symbolic' : 'microphone-sensitivity-high-symbolic';
+function on_activate() {
+  let was_muted = microphone.muted;
+  microphone.muted = !microphone.muted;
+  update_icon(!was_muted);
+  let icon_name = was_muted ? 'microphone-sensitivity-high-symbolic' : 'microphone-sensitivity-muted-symbolic';
   let monitor = -1;
+  let text = "";
+  text += was_muted ? "unmuted" : "muted";
+  text += " " + microphone.active;
   Main.osdWindowManager.show(
     monitor,
     Gio.Icon.new_for_string(icon_name),
     text);
+}
+
+function show_debug(text) {
+  Main.osdWindowManager.show(-1, Gio.Icon.new_for_string(""), text);
+}
+
+function microphone_icon(muted) {
+  let icon_name = muted ? 'microphone-sensitivity-muted-symbolic' : 'microphone-sensitivity-high-symbolic';
+  return Gio.Icon.new_for_string(icon_name);
+}
+
+let active = undefined;
+function on_state_changed() {
+  if (active == undefined) {
+    // no osd notifications on startup
+    active = microphone.active;
+    return;
+  }
+  if (active == microphone.active) {
+    // no change
+    return;
+  }
+  active = microphone.active;
+  let monitor = -1;
+  let text = active ? "Microphone activated" : "Microphone deactivated";
+  Main.osdWindowManager.show(
+    monitor, microphone_icon(!active), text);
 }
 
 function init() {
@@ -52,7 +134,11 @@ function init() {
   if (stream)
     update_icon(stream.is_muted);
   button.set_child(icon);
-  button.connect('button-press-event', show_hello);
+  button.connect('button-press-event', on_activate);
+
+  microphone = new Microphone();
+
+  microphone.connect('state-changed', on_state_changed);
 }
 
 function enable() {

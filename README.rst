@@ -5,7 +5,7 @@ push to talk
 gnome-shell
 ===========
 
-gnome-shell/js/ui/status/volume/js
+gnome-shell/js/ui/status/volume.js
 
 
 gvc
