@@ -13,28 +13,25 @@ const Microphone = new Lang.Class({
   _init: function() {
     this.active = false;
     this.stream = null;
-
+    this.muted_changed_id = 0;
     this.mixer_control = new Gvc.MixerControl({name: 'Nothing to say'});
     this.mixer_control.open();
-
-    this.mixer_control.connect(
-      'default-source-changed',
-      Lang.bind(this, this.update));
-    this.mixer_control.connect(
-      'stream-added',
-      Lang.bind(this, this.update));
-    this.mixer_control.connect(
-      'stream-removed',
-      Lang.bind(this, this.update));
-
+    this.mixer_control.connect('default-source-changed', Lang.bind(this, this.update));
+    this.mixer_control.connect('stream-added', Lang.bind(this, this.update));
+    this.mixer_control.connect('stream-removed', Lang.bind(this, this.update));
     this.update();
   },
 
   update: function() {
     // based on gnome-shell volume control
+    if (this.stream && this.muted_changed_id) {
+        this.stream.disconnect(this.muted_changed_id);
+    }
     this.stream = this.mixer_control.get_default_source();
     this.active = false;
     if (this.stream) {
+      this.muted_changed_id = this.stream.connect(
+        'notify::is-muted', Lang.bind(this, this.update));
       let recording_apps = this.mixer_control.get_source_outputs();
       for (let i = 0; i < recording_apps.length; i++) {
         let outputStream = recording_apps[i];
@@ -52,7 +49,8 @@ const Microphone = new Lang.Class({
   },
 
   set muted(muted) {
-    this.stream.change_is_muted(muted);
+    if (this.stream)
+      this.stream.change_is_muted(muted);
   }
 });
 Signals.addSignalMethods(Microphone.prototype);
@@ -96,27 +94,26 @@ function show_debug(text) {
   Main.osdWindowManager.show(-1, Gio.Icon.new_for_string(""), text);
 }
 
-function microphone_icon(muted) {
-  let icon_name = muted ? 'microphone-sensitivity-muted-symbolic' : 'microphone-sensitivity-high-symbolic';
-  return Gio.Icon.new_for_string(icon_name);
+function show_osd(text, active) {
+  let monitor = -1;
+  let icon_name = active ? 'microphone-sensitivity-high-symbolic' : 'microphone-sensitivity-muted-symbolic';
+  Main.osdWindowManager.show(
+    monitor,
+    Gio.Icon.new_for_string(icon_name),
+    text);
 }
 
 let active = undefined;
 function on_state_changed() {
-  if (active == undefined) {
-    // no osd notifications on startup
-    active = microphone.active;
-    return;
-  }
-  if (active == microphone.active) {
-    // no change
-    return;
-  }
+  let initial = (active == undefined);
+  let was_active = active;
   active = microphone.active;
-  let monitor = -1;
-  let text = active ? "Microphone activated" : "Microphone deactivated";
-  Main.osdWindowManager.show(
-    monitor, microphone_icon(!active), text);
+  if (initial)
+    return;
+  if (active != was_active) {
+    let text = active ? "Microphone activated" : "Microphone deactivated";
+    show_osd(text);
+  }
 }
 
 function init() {
