@@ -1,0 +1,8 @@
+{
+    "name": "Push to talk",
+    "description": "Unmute the microphone as long as a key is pressed.",
+    "uuid": "push-to-talk@extensions.gnome.wouter.bolsterl.ee",
+    "shell-version": [
+        "3.20.3"
+    ]
+}
