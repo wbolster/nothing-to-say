@@ -2,7 +2,7 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.nothing-to-say" path="/org/gnome/shell/extensions/nothing-to-say/">
     <key type="as" name="keybinding-toggle-mute">
-      <default>["&lt;Super&gt;Return"]</default>
+      <default>["&lt;Super&gt;backslash"]</default>
       <summary>Mute or unmute the microphone.</summary>
       <description>Mute or unmute the microphone.</description>
     </key>
