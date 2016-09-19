@@ -2,6 +2,7 @@ const Gio = imports.gi.Gio;
 const Gvc = imports.gi.Gvc;
 const Lang = imports.lang;
 const Main = imports.ui.main;
+const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 const St = imports.gi.St;
 
@@ -80,12 +81,35 @@ function update_icon(muted) {
   }
 }
 
+
+function change_muted_state(muted) {
+  microphone.muted = muted;
+  update_icon(muted);
+  show_osd(muted ? "Microphone muted" : "Microphone unmuted", muted);
+}
+
+function unmute() {
+    microphone.muted = false;
+    update_icon(false);
+    show_osd("Microphone unmuted", true);
+}
+
+
+let mute_timeout_id = 0;
+
 function on_activate(widget, event) {
-  log(event.toString());
-  let was_muted = microphone.muted;
-  microphone.muted = !microphone.muted;
-  update_icon(!was_muted);
-  show_osd(was_muted ? "Hold while speaking" : "Muted", was_muted);
+  if (microphone.muted) {
+    change_muted_state(true);
+  } else {
+    if (mute_timeout_id > 0)
+      Mainloop.source_remove(mute_timeout_id);
+    mute_timeout_id = Mainloop.timeout_add(
+      1000,
+      function() {
+        mute_timeout_id = 0;
+        change_muted_state(false);
+      });
+  }
 }
 
 function show_debug(text) {
