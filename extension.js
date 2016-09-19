@@ -2,11 +2,17 @@ const Gio = imports.gi.Gio;
 const Gvc = imports.gi.Gvc;
 const Lang = imports.lang;
 const Main = imports.ui.main;
+const Meta = imports.gi.Meta;
 const Mainloop = imports.mainloop;
+const Shell = imports.gi.Shell;
 const Signals = imports.signals;
 const St = imports.gi.St;
 
+const ExtensionUtils = imports.misc.extensionUtils;
+const Extension = ExtensionUtils.getCurrentExtension();
+const Settings = Extension.imports.settings;
 
+let keybindings;
 
 const Microphone = new Lang.Class({
   Name: 'Microphone',
@@ -126,6 +132,7 @@ function show_osd(text, active) {
 }
 
 function init() {
+  keybindings = (new Settings.Keybindings()).settings;
   button = new St.Bin({
     style_class: 'panel-button',
     reactive: true,
@@ -153,6 +160,12 @@ function init() {
 
 function enable() {
   Main.panel._rightBox.insert_child_at_index(button, 0);
+  Main.wm.addKeybinding(
+    'keybinding-toggle-mute',
+    keybindings,
+    Meta.KeyBindingFlags.NONE,
+    Shell["ActionMode"].NORMAL | Shell["ActionMode"].MESSAGE_TRAY,
+    on_activate);
 }
 
 function disable() {
