@@ -11,7 +11,7 @@ const Microphone = new Lang.Class({
   Name: 'Microphone',
 
   _init: function() {
-    this.active = false;
+    this.active = null;
     this.stream = null;
     this.muted_changed_id = 0;
     this.mixer_control = new Gvc.MixerControl({name: 'Nothing to say'});
@@ -25,9 +25,10 @@ const Microphone = new Lang.Class({
   update: function() {
     // based on gnome-shell volume control
     if (this.stream && this.muted_changed_id) {
-        this.stream.disconnect(this.muted_changed_id);
+      this.stream.disconnect(this.muted_changed_id);
     }
     this.stream = this.mixer_control.get_default_source();
+    let was_active = this.active;
     this.active = false;
     if (this.stream) {
       this.muted_changed_id = this.stream.connect(
@@ -41,7 +42,11 @@ const Microphone = new Lang.Class({
         }
       }
     }
-    this.emit('state-changed');
+    if (was_active === null)
+      return;
+    if (this.active == was_active)
+      return;
+    this.emit(this.active ? 'activated' : 'deactivated');
   },
 
   get muted() {
@@ -75,19 +80,12 @@ function update_icon(muted) {
   }
 }
 
-function on_activate() {
+function on_activate(widget, event) {
+  log(event.toString());
   let was_muted = microphone.muted;
   microphone.muted = !microphone.muted;
   update_icon(!was_muted);
-  let icon_name = was_muted ? 'microphone-sensitivity-high-symbolic' : 'microphone-sensitivity-muted-symbolic';
-  let monitor = -1;
-  let text = "";
-  text += was_muted ? "unmuted" : "muted";
-  text += " " + microphone.active;
-  Main.osdWindowManager.show(
-    monitor,
-    Gio.Icon.new_for_string(icon_name),
-    text);
+  show_osd(was_muted ? "Hold while speaking" : "Muted", was_muted);
 }
 
 function show_debug(text) {
@@ -101,19 +99,6 @@ function show_osd(text, active) {
     monitor,
     Gio.Icon.new_for_string(icon_name),
     text);
-}
-
-let active = undefined;
-function on_state_changed() {
-  let initial = (active == undefined);
-  let was_active = active;
-  active = microphone.active;
-  if (initial)
-    return;
-  if (active != was_active) {
-    let text = active ? "Microphone activated" : "Microphone deactivated";
-    show_osd(text);
-  }
 }
 
 function init() {
@@ -134,8 +119,12 @@ function init() {
   button.connect('button-press-event', on_activate);
 
   microphone = new Microphone();
-
-  microphone.connect('state-changed', on_state_changed);
+  microphone.connect('activated', function() {
+    show_osd("Microphone activated", true);
+  });
+  microphone.connect('deactivated', function() {
+    show_osd("Microphone deactivated", false);
+  });
 }
 
 function enable() {
