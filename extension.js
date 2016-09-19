@@ -97,13 +97,15 @@ function unmute() {
 let mute_timeout_id = 0;
 
 function on_activate(widget, event) {
-  show_osd("Microphone unmuted", false);
   if (microphone.muted) {
     microphone.muted = false;
     update_icon(false);
+    show_osd("Microphone unmuted", false);
   } else {
-    if (mute_timeout_id > 0)
+    if (mute_timeout_id > 0) {
       Mainloop.source_remove(mute_timeout_id);
+      show_osd("Microphone unmuted", false);
+    }
     mute_timeout_id = Mainloop.timeout_add(
       100,
       function() {
