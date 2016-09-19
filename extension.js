@@ -72,27 +72,27 @@ let microphone;
 let button, icon;
 
 function get_stream() {
+  // FIXME: remove in favour of Microphone.stream
   let control = Main.panel.statusArea.aggregateMenu._volume._control;
   return control.get_default_source();
+}
+
+function show_osd(text, muted) {
+  let monitor = -1;
+  let icon_name = muted ? 'microphone-sensitivity-muted-symbolic' : 'microphone-sensitivity-high-symbolic';
+  Main.osdWindowManager.show(
+    monitor,
+    Gio.Icon.new_for_string(icon_name),
+    text);
 }
 
 function update_icon(muted) {
   let stream = get_stream();
   if (!stream)
     return;
-  if (muted) {
-    icon.icon_name = 'microphone-sensitivity-muted-symbolic';
-  } else {
-    icon.icon_name = 'microphone-sensitivity-high-symbolic';
-  }
+  let icon_name = muted ? 'microphone-sensitivity-muted-symbolic' : 'microphone-sensitivity-high-symbolic';
+  icon.icon_name = icon_name;
 }
-
-function unmute() {
-    microphone.muted = false;
-    update_icon(false);
-    show_osd("Microphone unmuted", true);
-}
-
 
 let mute_timeout_id = 0;
 
@@ -115,19 +115,6 @@ function on_activate(widget, event) {
         show_osd("Microphone muted", true);
       });
   }
-}
-
-function show_debug(text) {
-  Main.osdWindowManager.show(-1, Gio.Icon.new_for_string(""), text);
-}
-
-function show_osd(text, muted) {
-  let monitor = -1;
-  let icon_name = muted ? 'microphone-sensitivity-muted-symbolic' : 'microphone-sensitivity-high-symbolic';
-  Main.osdWindowManager.show(
-    monitor,
-    Gio.Icon.new_for_string(icon_name),
-    text);
 }
 
 function init() {
