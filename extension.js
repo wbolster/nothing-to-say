@@ -163,7 +163,7 @@ function enable() {
     'keybinding-toggle-mute',
     keybindings,
     Meta.KeyBindingFlags.NONE,
-    Shell["ActionMode"].NORMAL | Shell["ActionMode"].MESSAGE_TRAY,
+    Shell.ActionMode.NORMAL | Shell.ActionMode.MESSAGE_TRAY,
     on_activate);
 }
 
