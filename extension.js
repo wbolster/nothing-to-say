@@ -87,13 +87,6 @@ function update_icon(muted) {
   }
 }
 
-
-function change_muted_state(muted) {
-  microphone.muted = muted;
-  update_icon(muted);
-  show_osd(muted ? "Microphone muted" : "Microphone unmuted", muted);
-}
-
 function unmute() {
     microphone.muted = false;
     update_icon(false);
@@ -104,16 +97,20 @@ function unmute() {
 let mute_timeout_id = 0;
 
 function on_activate(widget, event) {
+  show_osd("Microphone unmuted", false);
   if (microphone.muted) {
-    change_muted_state(true);
+    microphone.muted = false;
+    update_icon(false);
   } else {
     if (mute_timeout_id > 0)
       Mainloop.source_remove(mute_timeout_id);
     mute_timeout_id = Mainloop.timeout_add(
-      1000,
+      100,
       function() {
         mute_timeout_id = 0;
-        change_muted_state(false);
+        microphone.muted = true;
+        update_icon(true);
+        show_osd("Microphone muted", true);
       });
   }
 }
@@ -122,9 +119,9 @@ function show_debug(text) {
   Main.osdWindowManager.show(-1, Gio.Icon.new_for_string(""), text);
 }
 
-function show_osd(text, active) {
+function show_osd(text, muted) {
   let monitor = -1;
-  let icon_name = active ? 'microphone-sensitivity-high-symbolic' : 'microphone-sensitivity-muted-symbolic';
+  let icon_name = muted ? 'microphone-sensitivity-muted-symbolic' : 'microphone-sensitivity-high-symbolic';
   Main.osdWindowManager.show(
     monitor,
     Gio.Icon.new_for_string(icon_name),
@@ -151,10 +148,10 @@ function init() {
 
   microphone = new Microphone();
   microphone.connect('activated', function() {
-    show_osd("Microphone activated", true);
+    show_osd("Microphone activated", false);
   });
   microphone.connect('deactivated', function() {
-    show_osd("Microphone deactivated", false);
+    show_osd("Microphone deactivated", true);
   });
 }
 
