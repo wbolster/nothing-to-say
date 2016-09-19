@@ -1,8 +1,8 @@
 {
-    "name": "Push to talk",
-    "description": "Unmute the microphone as long as a key is pressed.",
-    "uuid": "push-to-talk@extensions.gnome.wouter.bolsterl.ee",
+    "name": "Nothing to say",
+    "description": "Unmute the microphone only when you have something to say.",
+    "uuid": "nothing-to-say@extensions.gnome.wouter.bolsterl.ee",
     "shell-version": [
-        "3.20.3"
+        "3.20"
     ]
 }
