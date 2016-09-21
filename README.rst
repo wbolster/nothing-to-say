@@ -2,32 +2,153 @@
 nothing to say
 ==============
 
-gnome-shell
-===========
-
-gnome-shell/js/ui/status/volume.js
-
-libgnome-volume-control
-=======================
-
-https://github.com/GNOME/libgnome-volume-control/blob/master/gvc-mixer-control.c
-
-Gvc = imports.gi.Gvc;
-https://www.roojs.org/seed/gir-1.2-gtk-3.0/seed/Gvc.MixerControl.html
-default_source_changed
-
-https://www.roojs.org/seed/gir-1.2-gtk-3.0/seed/Gvc.MixerStream.html
+this gnome-shell extension always keeps your microphone muted, unless
+you actually have something to say.
 
 
-volume mixer extension
-======================
+for whom?
+=========
 
-https://github.com/aleho/gnome-shell-volume-mixer/blob/master/shell-volume-mixer%40derhofbauer.at/mixer.js
-hotkeys: https://github.com/aleho/gnome-shell-volume-mixer/blob/master/shell-volume-mixer%40derhofbauer.at/hotkeys.js
+this extension is intended for gnome users who participate in
+teleconferences.
+
+it is especially awesome if you are in a noisy environment. you know,
+those coffee bars where the hipster crowd sits with their laptops.
+sipping from a way too expensive soy latte macchiato. which was served
+with a complimentary tiny slice of gluten-free cake. which happens to
+be smaller than your finger nail. and it does not even taste sweet.
+anyway, i digress.
+
+is this you? great. read on.
+
+not you? well, maybe you are in a less exciting, but perhaps more
+common, open-plan office.
+
+is this you? totally cool. read on.
 
 
-audio switcher extension
-========================
+what?
+=====
 
-https://extensions.gnome.org/extension/1028/gnome-shell-audio-output-switcher/
-https://github.com/AndresCidoncha/audio-switcher/blob/master/extension.js
+this extension offers these amazing features:
+
+* microphone icon in the top bar
+
+  the icon shows whether the mic is muted or not. click it to toggle.
+  the icon is only visible when the microphone is actually being
+  recorded. that means no visual clutter if the microphone is not in
+  use.
+
+* shortcut key to mute or unmute
+
+  press the shortcut key once to unmute, and once again to mute.
+
+  but there is more. the shortcut key also functions as a
+  walkie-talkie style push-to-talk button. how cool is that?
+
+  you do not know what that is? no worries, it is rather simple. press
+  the configured shortcut key to unmute the microphone, and keep it
+  pressed. whenever you release the shortcut key, the microphone will
+  be muted again. so as long as you press the key you can talk, and as
+  soon as you release it, you can cough and sneeze as much as you
+  like.
+
+  the default shortcut is ``<Super>backslash``. you don’t like it?
+  funny, neither do i. but at least it does not clash with anything
+  else, so please do not complain about it. why not? well, because you
+  can change it. you can even add additional shortcuts. this involves
+  setting the appropriate dconf key. the easiest way is typing this
+  into a terminal window::
+
+    dconf write /org/gnome/shell/extensions/nothing-to-say/keybinding-toggle-mute '["<Super>backslash", "Pause"]'
+
+  of course you should change the preferred shortcuts into something
+  that makes sense for you and your keyboard.
+
+* on screen display (osd) pop-up notifications
+
+  an osd pop-up, which is the small overlay window that also pops up
+  when you change your speaker volume or laptop screen brightness,
+  will be shown for the following events:
+
+  * microphone (de)activation
+
+    this happens when a video conferencing application starts or stops
+    recording.
+
+  * microphone muting and unmuting
+
+    this happens when you mute the microphone by clicking on the icon
+    or pressing the shortcut key.
+
+
+why?
+====
+
+when participating in a group call, it is very likely that you are not
+speaking most of the time, unless you are the main speaker in a remote
+presentation. so why stream all your background noise to the rest of
+the attendees?
+
+think for a bit. oh yes. you have heard ringing phones, crying babies,
+coughs, sneezes, or, if you have been particularly unlucky, even less
+appetising sounds. at some point people get annoyed. someone will
+speak up to ask others to mute themselves. the original conversation
+got interrupted. the attendees got distracted. what were we talking
+about again? what was this meeting supposed to be about in the first
+place?
+
+oops, i digress. again.
+
+luckily most teleconferencing applications allow you to mute yourself.
+however, that usually involves clicking a button in that application‘s
+window. and that application may not be visible. because you were just
+getting some real work done. right?
+
+nah. more likely, you were looking at cat pictures. oh boy, this one
+is seriously cute. oh wow. this one is even cuter.
+
+at this point someone in the meeting suddenly asks you a question.
+
+focus. think. act. you have to quickly find the correct window.
+dammit, where has that browser tab gone? ah, found it. unmute
+yourself. speak for a bit. now mute yourself again.
+
+so many things to do when you just want to speak a few wise words.
+‘correct, boss, as usual you are completely right!’
+
+now. that was stressful.
+
+let‘s fix this.
+
+
+how?
+====
+
+this extension is not (yet) distributed via the official channels.
+that sucks. i know. yes. later.
+
+for the moment, put a clone of this repository in this directory::
+
+  ~/.local/share/gnome-shell/extensions/nothing-to-say@extensions.gnome.wouter.bolsterl.ee/
+
+note that the files must be directly in this directory, not in a
+subdirectory thereof.
+
+
+who wrote this?
+===============
+
+wouter bolsterlee. wbolster.
+
+https://github.com/wbolster on github. star my repos. fork them. and so on.
+
+https://twitter.com/wbolster on twitter. follow me. or say hi.
+
+
+anything else?
+==============
+
+oh yes. this is alpha quality experimental software. feedback welcome
+via the issue tracker, both praise and complaints. although preferably
+the former.
