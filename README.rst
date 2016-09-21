@@ -7,9 +7,10 @@ gnome-shell
 
 gnome-shell/js/ui/status/volume.js
 
+libgnome-volume-control
+=======================
 
-gvc
-===
+https://github.com/GNOME/libgnome-volume-control/blob/master/gvc-mixer-control.c
 
 Gvc = imports.gi.Gvc;
 https://www.roojs.org/seed/gir-1.2-gtk-3.0/seed/Gvc.MixerControl.html
