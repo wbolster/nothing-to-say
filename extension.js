@@ -156,4 +156,5 @@ function enable() {
 
 function disable() {
   Main.panel._rightBox.remove_child(button);
+  Main.wm.removeKeybinding('keybinding-toggle-mute');
 }
