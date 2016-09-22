@@ -5,15 +5,18 @@ nothing to say
 this gnome-shell extension always keeps your microphone muted, unless
 you actually have something to say.
 
-tl;dr:
+tl;dr
+=====
 
 * microphone icon in the top bar when recording is active
 * one-click mute/unmute using the icon
 * keyboard shortcut to mute/unmute, with push-to-talk
-* mute or unmute by using a shortcut key, featuring push-to-talk
 * osd notifications for microphone events
 
-this is how it looks in top bar:
+pics?
+=====
+
+this is how it looks in the top bar:
 
 .. image:: /screenshot-top-bar.png?raw=true
    :alt: top bar screenshot
@@ -24,6 +27,7 @@ this is the osd notification:
 .. image:: /screenshot-osd.png?raw=true
    :alt: osd screenshot
    :align: center
+
 
 for whom?
 =========
@@ -151,6 +155,8 @@ so many things to do when you just want to speak a few wise words.
 ‘correct, boss, as usual you are completely right!’
 
 now. that was stressful.
+
+situations like that need fixing. that’s why.
 
 
 who wrote this?
