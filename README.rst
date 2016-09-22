@@ -5,6 +5,15 @@ nothing to say
 this gnome-shell extension always keeps your microphone muted, unless
 you actually have something to say.
 
+tl;dr
+=====
+
+* microphone icon in the top bar when recording is active
+* one-click mute/unmute using the icon
+* keyboard shortcut to mute/unmute, with push-to-talk
+* mute or unmute by using a shortcut key, featuring push-to-talk
+* osd notifications for microphone events
+
 
 for whom?
 =========
@@ -82,6 +91,20 @@ this extension offers these amazing features:
     or pressing the shortcut key.
 
 
+how?
+====
+
+this extension is not (yet) distributed via the official channels.
+that sucks. i know. yes. later.
+
+for the moment, put a clone of this repository in this directory::
+
+  ~/.local/share/gnome-shell/extensions/nothing-to-say@extensions.gnome.wouter.bolsterl.ee/
+
+note that the files must be directly in this directory, not in a
+subdirectory thereof.
+
+
 why?
 ====
 
@@ -118,22 +141,6 @@ so many things to do when you just want to speak a few wise words.
 ‘correct, boss, as usual you are completely right!’
 
 now. that was stressful.
-
-let‘s fix this.
-
-
-how?
-====
-
-this extension is not (yet) distributed via the official channels.
-that sucks. i know. yes. later.
-
-for the moment, put a clone of this repository in this directory::
-
-  ~/.local/share/gnome-shell/extensions/nothing-to-say@extensions.gnome.wouter.bolsterl.ee/
-
-note that the files must be directly in this directory, not in a
-subdirectory thereof.
 
 
 who wrote this?
