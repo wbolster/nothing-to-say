@@ -9,7 +9,6 @@ const Shell = imports.gi.Shell;
 const Signals = imports.signals;
 const St = imports.gi.St;
 
-const GSETTINGS_SCHEMA_ROOT = 'org.gnome.shell.extensions.nothing-to-say';
 const KEYBINDING_KEY_NAME = 'keybinding-toggle-mute';
 
 let microphone;
@@ -137,11 +136,11 @@ function get_settings() {
       false);
   else  // global install (same prefix as gnome-shell)
     schema_source = Gio.SettingsSchemaSource.get_default();
-  let schema = schema_source.lookup(GSETTINGS_SCHEMA_ROOT, true);
+  let schema_id = extension.metadata['settings-schema'];
+  let schema = schema_source.lookup(schema_id, true);
   if (!schema)
     throw new Error(
-      'Schema ' + GSETTINGS_SCHEMA_ROOT +
-      ' could not be found for extension ' +
+      'Schema ' + schema_id + ' could not be found for extension ' +
       extension.metadata.uuid);
   return new Gio.Settings({settings_schema: schema});
 }
