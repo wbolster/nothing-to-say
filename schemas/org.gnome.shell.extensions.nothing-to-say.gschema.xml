@@ -3,8 +3,8 @@
   <schema id="org.gnome.shell.extensions.nothing-to-say" path="/org/gnome/shell/extensions/nothing-to-say/">
     <key type="as" name="keybinding-toggle-mute">
       <default>["&lt;Super&gt;backslash"]</default>
-      <summary>Mute or unmute the microphone.</summary>
-      <description>Mute or unmute the microphone.</description>
+      <summary>Shortcut keys to mute or unmute the microphone.</summary>
+      <description>These shortcut keys will mute or unmute the microphone when pressed once, and will act as a push-to-talk button when held down.</description>
     </key>
   </schema>
 </schemalist>
