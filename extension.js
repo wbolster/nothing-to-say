@@ -106,20 +106,20 @@ let mute_timeout_id = 0;
 function on_activate(widget, event) {
   if (microphone.muted) {
     microphone.muted = false;
-    show_osd("Microphone unmuted", false, microphone.level);
+    show_osd(null, false, microphone.level);
   } else {
     // use a delay before muting; this makes push-to-talk work
     if (mute_timeout_id) {
       Mainloop.source_remove(mute_timeout_id);
       show_osd(  // keep osd visible
-        "Microphone unmuted", false, microphone.level);
+        null, false, microphone.level);
     }
     mute_timeout_id = Mainloop.timeout_add(
       100,
       function() {
         mute_timeout_id = 0;
         microphone.muted = true;
-        show_osd("Microphone muted", true, 0);
+        show_osd(null, true, 0);
       });
   }
 }
