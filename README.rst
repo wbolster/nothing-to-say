@@ -5,6 +5,7 @@ nothing to say
 this gnome-shell extension always keeps your microphone muted, unless
 you actually have something to say.
 
+
 tl;dr
 =====
 
@@ -12,6 +13,8 @@ tl;dr
 * one-click mute/unmute using the icon
 * keyboard shortcut to mute/unmute, with push-to-talk
 * osd notifications for microphone events
+* install from https://extensions.gnome.org/extension/1113/nothing-to-say/
+
 
 pics?
 =====
@@ -108,10 +111,13 @@ this extension offers these amazing features:
 how?
 ====
 
-this extension is not (yet) distributed via the official channels.
-that sucks. i know. yes. later.
+this extension is available via the official `gnome-shell extensions
+repository <https://extensions.gnome.org/>`_:
 
-for the moment, put a clone of this repository in this directory::
+https://extensions.gnome.org/extension/1113/nothing-to-say/
+
+alternatively, if you‘re feeling adventurous or want to contribute,
+put a clone of this repository (or a symlink) in this directory::
 
   ~/.local/share/gnome-shell/extensions/nothing-to-say@extensions.gnome.wouter.bolsterl.ee/
 
