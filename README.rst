@@ -40,9 +40,9 @@ teleconferences.
 
 it is especially awesome if you are in a noisy environment. you know,
 those coffee bars where the hipster crowd sits with their laptops.
-sipping from a way too expensive soy latte macchiato. which was served
-with a complimentary tiny slice of gluten-free cake. which happens to
-be smaller than your finger nail. and it does not even taste sweet.
+sipping from a way too expensive soy latte macchiato. which is served
+with a complimentary slice of gluten-free cake. which happens to be
+smaller than your finger nail. and it does not even taste sweet.
 anyway, i digress.
 
 is this you? great. read on.
@@ -136,7 +136,7 @@ the attendees?
 think for a bit. oh yes. you have heard ringing phones, crying babies,
 coughs, sneezes, or, if you have been particularly unlucky, even less
 appetising sounds. at some point people get annoyed. someone will
-speak up to ask others to mute themselves. the original conversation
+speak up to ask others to please be quiet. the original conversation
 got interrupted. the attendees got distracted. what were we talking
 about again? what was this meeting supposed to be about in the first
 place?
