@@ -25,7 +25,7 @@ this is how it looks in the top bar:
    :alt: top bar screenshot
    :align: center
 
-this is the osd notification:
+this is the osd (on screen display) notification:
 
 .. image:: /screenshot-osd.png?raw=true
    :alt: osd screenshot
