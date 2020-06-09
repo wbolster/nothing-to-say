@@ -9,7 +9,7 @@ you actually have something to say.
 tl;dr
 =====
 
-* microphone icon in the top bar when recording is active
+* microphone icon in the top bar, only visible when recording is active
 * one-click mute/unmute using the icon
 * keyboard shortcut to mute/unmute, with push-to-talk
 * osd notifications for microphone events
