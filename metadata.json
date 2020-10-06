@@ -12,7 +12,8 @@
         "3.30",
         "3.32",
         "3.34",
-        "3.36"
+        "3.36",
+        "3.38"
     ],
     "settings-schema": "org.gnome.shell.extensions.nothing-to-say",
     "url": "https://github.com/wbolster/nothing-to-say",
