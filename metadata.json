@@ -17,5 +17,5 @@
     ],
     "settings-schema": "org.gnome.shell.extensions.nothing-to-say",
     "url": "https://github.com/wbolster/nothing-to-say",
-    "version": 3
+    "version": 5
 }
