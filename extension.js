@@ -186,7 +186,7 @@ function enable() {
     KEYBINDING_KEY_NAME,
     settings,
     Meta.KeyBindingFlags.NONE,
-    Shell.ActionMode.NORMAL | Shell.ActionMode.MESSAGE_TRAY,
+    Shell.ActionMode.NORMAL,
     on_activate);
 }
 
