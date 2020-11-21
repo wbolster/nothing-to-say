@@ -5,15 +5,15 @@ nothing to say
 this gnome-shell extension always keeps your microphone muted, unless
 you actually have something to say.
 
-
-tl;dr
-=====
+tl;dr:
 
 * microphone icon in the top bar, only visible when recording is active
 * one-click mute/unmute using the icon
 * keyboard shortcut to mute/unmute, with push-to-talk
 * osd notifications for microphone events
 * install from https://extensions.gnome.org/extension/1113/nothing-to-say/
+
+like it? you can `buy me a coffee <https://www.buymeacoffee.com/wbolster>`_! ☕🙏
 
 
 pics?
