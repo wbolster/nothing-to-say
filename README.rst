@@ -82,9 +82,11 @@ this extension offers these amazing features:
   the default shortcut is ``<Super>backslash``. you don’t like it?
   funny, neither do i. but at least it does not clash with anything
   else, so please do not complain about it. why not? well, because you
-  can change it. you can even add additional shortcuts. this involves
-  setting the appropriate dconf key. the easiest way is typing this
-  into a terminal window::
+  can change it in the preference pane!
+
+  you can even add additional shortcuts. this involves setting the
+  appropriate dconf key. the easiest way is typing this into a
+  terminal window::
 
     dconf write /org/gnome/shell/extensions/nothing-to-say/keybinding-toggle-mute '["<Super>backslash", "Pause"]'
 
