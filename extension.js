@@ -198,6 +198,12 @@ function enable() {
     Meta.KeyBindingFlags.NONE,
     Shell.ActionMode.NORMAL,
     on_activate);
+  settings.connect(
+    'changed::icon-visibility',
+    function() {
+      panel_button.visible = icon_should_be_visible(microphone.active);
+  });
+
 }
 
 function disable() {
