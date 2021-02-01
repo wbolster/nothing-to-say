@@ -111,11 +111,20 @@ function show_osd(text, muted, level) {
 
 let mute_timeout_id = 0;
 
+function on_panel_button_click() {
+  on_activate(false);
+}
 
-function on_activate(widget, event) {
+function on_toggle_key_press() {
+  on_activate(true);
+}
+
+function on_activate(give_feedback) {
   if (microphone.muted) {
     microphone.muted = false;
-    show_osd(null, false, microphone.level);
+    if (give_feedback) {
+      show_osd(null, false, microphone.level);
+    }
   } else {
     // use a delay before muting; this makes push-to-talk work
     if (mute_timeout_id) {
@@ -128,7 +137,9 @@ function on_activate(widget, event) {
       function() {
         mute_timeout_id = 0;
         microphone.muted = true;
-        show_osd(null, true, 0);
+        if (give_feedback) {
+          show_osd(null, true, 0);
+        }
       });
   }
 }
@@ -175,7 +186,7 @@ function enable() {
     visible: icon_should_be_visible(microphone.active)
   });
   panel_button.set_child(panel_icon);
-  panel_button.connect('button-press-event', on_activate);
+  panel_button.connect('button-press-event', on_panel_button_click);
   microphone.connect(
     'notify::active',
     function() {
@@ -197,13 +208,12 @@ function enable() {
     settings,
     Meta.KeyBindingFlags.NONE,
     Shell.ActionMode.NORMAL,
-    on_activate);
+    on_toggle_key_press);
   settings.connect(
     'changed::icon-visibility',
     function() {
       panel_button.visible = icon_should_be_visible(microphone.active);
   });
-
 }
 
 function disable() {
