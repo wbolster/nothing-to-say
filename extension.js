@@ -10,6 +10,10 @@ const Signals = imports.signals;
 const St = imports.gi.St;
 
 const KEYBINDING_KEY_NAME = 'keybinding-toggle-mute';
+const EXCLUDED_APPLICATION_IDS = [
+  "org.gnome.VolumeControl",
+  "org.PulseAudio.pavucontrol",
+];
 
 let microphone;
 
@@ -43,9 +47,8 @@ const Microphone = new Lang.Class({
       for (let i = 0; i < recording_apps.length; i++) {
         let output_stream = recording_apps[i];
         let id = output_stream.get_application_id();
-        if (!id || (id != 'org.gnome.VolumeControl' && id != 'org.PulseAudio.pavucontrol')) {
-          this.active = true;
-        }
+        if (EXCLUDED_APPLICATION_IDS.includes(id)) continue;
+        this.active = true;
       }
     }
     this.notify_muted();
