@@ -122,7 +122,7 @@ function on_toggle_key_press() {
 function on_activate(give_feedback) {
   if (microphone.muted) {
     microphone.muted = false;
-    if(give_feedback) {
+    if (give_feedback) {
       show_osd(null, false, microphone.level);
     }
   } else {
@@ -137,7 +137,7 @@ function on_activate(give_feedback) {
       function() {
         mute_timeout_id = 0;
         microphone.muted = true;
-        if(give_feedback) {
+        if (give_feedback) {
           show_osd(null, true, 0);
         }
       });
