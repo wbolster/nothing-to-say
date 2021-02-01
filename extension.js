@@ -89,6 +89,15 @@ function get_icon_name(muted) {
     return 'microphone-sensitivity-high-symbolic';
 }
 
+function icon_should_be_visible(microphone_active) {
+  let setting = settings.get_value('icon-visibility').unpack();
+  if (setting === 'always')
+    return true;
+  if (setting === 'never')
+    return false;
+  return microphone.active;  // when-recording
+}
+
 
 function show_osd(text, muted, level) {
   let monitor = -1;
@@ -174,13 +183,14 @@ function enable() {
     reactive: true,
     can_focus: true,
     track_hover: true,
-    visible: microphone.active});
+    visible: icon_should_be_visible(microphone.active)
+  });
   panel_button.set_child(panel_icon);
   panel_button.connect('button-press-event', on_panel_button_click);
   microphone.connect(
     'notify::active',
     function() {
-      panel_button.visible = microphone.active;
+      panel_button.visible = icon_should_be_visible(microphone.active);
       if (initialised || microphone.active)
         show_osd(
           microphone.active ? "Microphone activated" : "Microphone deactivated",
@@ -199,6 +209,11 @@ function enable() {
     Meta.KeyBindingFlags.NONE,
     Shell.ActionMode.NORMAL,
     on_toggle_key_press);
+  settings.connect(
+    'changed::icon-visibility',
+    function() {
+      panel_button.visible = icon_should_be_visible(microphone.active);
+  });
 }
 
 function disable() {
