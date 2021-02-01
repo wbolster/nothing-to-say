@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.nothing-to-say" path="/org/gnome/shell/extensions/nothing-to-say/">
-    <key type="as" name="keybinding-toggle-mute">
+    <key name="icon-visibility" type="s">
+      <choices>
+        <choice value="when-recording"/>
+        <choice value="always"/>
+        <choice value="never"/>
+      </choices>
+      <default>'when-recording'</default>
+      <summary>When to show the icon</summary>
+      <description>This specifies when the microphone icon in the topbar is visible.</description>
+    </key>
+    <key name="keybinding-toggle-mute" type="as">
       <default>["&lt;Super&gt;backslash"]</default>
       <summary>Mute or unmute</summary>
       <description>These shortcut keys will mute or unmute the microphone when pressed once, and will act as a push-to-talk button when held down.</description>

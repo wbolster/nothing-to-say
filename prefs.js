@@ -45,5 +45,28 @@ function buildPrefsWidget() {
   listBox.show_all();
   prefsWidget.attach(listBox, 1, 1, 1, 1);
 
+  // Show top bar icon label
+  let iconVisibleLabel = new Gtk.Label({
+    label: 'Show top bar icon',
+    halign: Gtk.Align.START,
+    visible: true
+  });
+  prefsWidget.attach(iconVisibleLabel, 0, 2, 1, 1);
+
+  // Show top bar icon combo box
+  let iconVisibleComboBox = new Gtk.ComboBoxText();
+  iconVisibleComboBox.append("when-recording", "When recording");
+  iconVisibleComboBox.append("always", "Always");
+  iconVisibleComboBox.append("never", "Never");
+  this.settings.bind(
+    'icon-visibility',
+    iconVisibleComboBox,
+    'active-id',
+    Gio.SettingsBindFlags.DEFAULT
+  );
+  prefsWidget.attach(iconVisibleComboBox, 1, 2, 1, 1);
+
+  prefsWidget.show_all();
+
   return prefsWidget;
 }
