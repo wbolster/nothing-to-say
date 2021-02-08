@@ -9,7 +9,7 @@ const Shell = imports.gi.Shell;
 const Signals = imports.signals;
 const St = imports.gi.St;
 
-const KEYBINDING_KEY_NAME = 'keybinding-toggle-mute';
+const KEYBINDING_KEY_NAME = "keybinding-toggle-mute";
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
   "org.PulseAudio.pavucontrol",
@@ -18,21 +18,24 @@ const EXCLUDED_APPLICATION_IDS = [
 let microphone;
 
 const Microphone = new Lang.Class({
-  Name: 'Microphone',
+  Name: "Microphone",
 
-  _init: function() {
+  _init: function () {
     this.active = null;
     this.stream = null;
     this.muted_changed_id = 0;
-    this.mixer_control = new Gvc.MixerControl({name: 'Nothing to say'});
+    this.mixer_control = new Gvc.MixerControl({ name: "Nothing to say" });
     this.mixer_control.open();
-    this.mixer_control.connect('default-source-changed', Lang.bind(this, this.refresh));
-    this.mixer_control.connect('stream-added', Lang.bind(this, this.refresh));
-    this.mixer_control.connect('stream-removed', Lang.bind(this, this.refresh));
+    this.mixer_control.connect(
+      "default-source-changed",
+      Lang.bind(this, this.refresh)
+    );
+    this.mixer_control.connect("stream-added", Lang.bind(this, this.refresh));
+    this.mixer_control.connect("stream-removed", Lang.bind(this, this.refresh));
     this.refresh();
   },
 
-  refresh: function() {
+  refresh: function () {
     // based on gnome-shell volume control
     if (this.stream && this.muted_changed_id) {
       this.stream.disconnect(this.muted_changed_id);
@@ -42,7 +45,9 @@ const Microphone = new Lang.Class({
     this.stream = this.mixer_control.get_default_source();
     if (this.stream) {
       this.muted_changed_id = this.stream.connect(
-        'notify::is-muted', Lang.bind(this, this.notify_muted));
+        "notify::is-muted",
+        Lang.bind(this, this.notify_muted)
+      );
       let recording_apps = this.mixer_control.get_source_outputs();
       for (let i = 0; i < recording_apps.length; i++) {
         let output_stream = recording_apps[i];
@@ -52,44 +57,42 @@ const Microphone = new Lang.Class({
       }
     }
     this.notify_muted();
-    if (this.active != was_active)
-        this.emit('notify::active');
+    if (this.active != was_active) {
+      this.emit("notify::active");
+    }
   },
 
-  destroy: function() {
-      this.mixer_control.close();
+  destroy: function () {
+    this.mixer_control.close();
   },
 
-  notify_muted: function() {
-    this.emit('notify::muted');
+  notify_muted: function () {
+    this.emit("notify::muted");
   },
 
   get muted() {
-    if (!this.stream)
-      return true;
+    if (!this.stream) return true;
     return this.stream.is_muted;
   },
 
   set muted(muted) {
-    if (!this.stream)
-      return;
+    if (!this.stream) return;
     this.stream.change_is_muted(muted);
   },
 
   get level() {
-    if (!this.stream)
-        return 0;
-    return 100 * this.stream.get_volume() / this.mixer_control.get_vol_max_norm();
-  }
+    if (!this.stream) return 0;
+    return (
+      (100 * this.stream.get_volume()) / this.mixer_control.get_vol_max_norm()
+    );
+  },
 });
 Signals.addSignalMethods(Microphone.prototype);
 
-
 function get_icon_name(muted) {
-  if (muted)
-    return 'microphone-sensitivity-muted-symbolic';
-  else
-    return 'microphone-sensitivity-high-symbolic';
+  return muted
+    ? "microphone-sensitivity-muted-symbolic"
+    : "microphone-sensitivity-high-symbolic";
 }
 
 function icon_should_be_visible(microphone_active) {
@@ -104,16 +107,15 @@ function icon_should_be_visible(microphone_active) {
   }
 }
 
-
 function show_osd(text, muted, level) {
   let monitor = -1;
   Main.osdWindowManager.show(
     monitor,
     Gio.Icon.new_for_string(get_icon_name(muted)),
     text,
-    level);
+    level
+  );
 }
-
 
 let mute_timeout_id = 0;
 
@@ -135,90 +137,90 @@ function on_activate(give_feedback) {
     // use a delay before muting; this makes push-to-talk work
     if (mute_timeout_id) {
       Mainloop.source_remove(mute_timeout_id);
-      show_osd(  // keep osd visible
-        null, false, microphone.level);
+      // keep osd visible
+      show_osd(null, false, microphone.level);
     }
-    mute_timeout_id = Mainloop.timeout_add(
-      100,
-      function() {
-        mute_timeout_id = 0;
-        microphone.muted = true;
-        if (give_feedback) {
-          show_osd(null, true, 0);
-        }
-      });
+    mute_timeout_id = Mainloop.timeout_add(100, function () {
+      mute_timeout_id = 0;
+      microphone.muted = true;
+      if (give_feedback) {
+        show_osd(null, true, 0);
+      }
+    });
   }
 }
 
-
 function get_settings() {
   let extension = ExtensionUtils.getCurrentExtension();
-  let schema_dir = extension.dir.get_child('schemas');
+  let schema_dir = extension.dir.get_child("schemas");
   let schema_source;
-  if (schema_dir.query_exists(null))  // local install
+  if (schema_dir.query_exists(null)) {
+    // local install
     schema_source = Gio.SettingsSchemaSource.new_from_directory(
       schema_dir.get_path(),
       Gio.SettingsSchemaSource.get_default(),
-      false);
-  else  // global install (same prefix as gnome-shell)
+      false
+    );
+  } else {
+    // global install (same prefix as gnome-shell)
     schema_source = Gio.SettingsSchemaSource.get_default();
-  let schema_id = extension.metadata['settings-schema'];
+  }
+  let schema_id = extension.metadata["settings-schema"];
   let schema = schema_source.lookup(schema_id, true);
   if (!schema)
     throw new Error(
-      'Schema ' + schema_id + ' could not be found for extension ' +
-      extension.metadata.uuid);
-  return new Gio.Settings({settings_schema: schema});
+      "Schema " +
+        schema_id +
+        " could not be found for extension " +
+        extension.metadata.uuid
+    );
+  return new Gio.Settings({ settings_schema: schema });
 }
 
 const settings = get_settings();
 
-function init() {
-}
+function init() {}
 
 let panel_button, panel_icon;
-let initialised = false;  // flag to avoid notifications on startup
+let initialised = false; // flag to avoid notifications on startup
 
 function enable() {
   microphone = new Microphone();
   panel_icon = new St.Icon({
-    icon_name: '',
-    style_class: 'system-status-icon'});
+    icon_name: "",
+    style_class: "system-status-icon",
+  });
   panel_button = new St.Bin({
-    style_class: 'panel-button',
+    style_class: "panel-button",
     reactive: true,
     can_focus: true,
     track_hover: true,
-    visible: icon_should_be_visible(microphone.active)
+    visible: icon_should_be_visible(microphone.active),
   });
   panel_button.set_child(panel_icon);
-  panel_button.connect('button-press-event', on_panel_button_click);
-  microphone.connect(
-    'notify::active',
-    function() {
-      panel_button.visible = icon_should_be_visible(microphone.active);
-      if (initialised || microphone.active)
-        show_osd(
-          microphone.active ? "Microphone activated" : "Microphone deactivated",
-          microphone.muted);
-      initialised = true;
-    });
-  microphone.connect(
-    'notify::muted',
-    function () {
-      panel_icon.icon_name = get_icon_name(microphone.muted);
-    });
+  panel_button.connect("button-press-event", on_panel_button_click);
+  microphone.connect("notify::active", function () {
+    panel_button.visible = icon_should_be_visible(microphone.active);
+    if (initialised || microphone.active)
+      show_osd(
+        microphone.active ? "Microphone activated" : "Microphone deactivated",
+        microphone.muted
+      );
+    initialised = true;
+  });
+  microphone.connect("notify::muted", function () {
+    panel_icon.icon_name = get_icon_name(microphone.muted);
+  });
   Main.panel._rightBox.insert_child_at_index(panel_button, 0);
   Main.wm.addKeybinding(
     KEYBINDING_KEY_NAME,
     settings,
     Meta.KeyBindingFlags.NONE,
     Shell.ActionMode.NORMAL,
-    on_toggle_key_press);
-  settings.connect(
-    'changed::icon-visibility',
-    function() {
-      panel_button.visible = icon_should_be_visible(microphone.active);
+    on_toggle_key_press
+  );
+  settings.connect("changed::icon-visibility", function () {
+    panel_button.visible = icon_should_be_visible(microphone.active);
   });
 }
 
