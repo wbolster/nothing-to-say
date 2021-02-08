@@ -93,12 +93,15 @@ function get_icon_name(muted) {
 }
 
 function icon_should_be_visible(microphone_active) {
-  let setting = settings.get_value('icon-visibility').unpack();
-  if (setting === 'always')
-    return true;
-  if (setting === 'never')
-    return false;
-  return microphone.active;  // when-recording
+  let setting = settings.get_value("icon-visibility").unpack();
+  switch (setting) {
+    case "always":
+      return true;
+    case "never":
+      return false;
+    default:
+      return microphone.active; // when-recording
+  }
 }
 
 
