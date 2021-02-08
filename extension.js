@@ -1,7 +1,6 @@
 const ExtensionUtils = imports.misc.extensionUtils;
 const Gio = imports.gi.Gio;
 const Gvc = imports.gi.Gvc;
-const Lang = imports.lang;
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
 const Meta = imports.gi.Meta;
@@ -24,12 +23,12 @@ const Microphone = class Microphone {
     this.muted_changed_id = 0;
     this.mixer_control = new Gvc.MixerControl({ name: "Nothing to say" });
     this.mixer_control.open();
-    this.mixer_control.connect(
-      "default-source-changed",
-      Lang.bind(this, this.refresh)
-    );
-    this.mixer_control.connect("stream-added", Lang.bind(this, this.refresh));
-    this.mixer_control.connect("stream-removed", Lang.bind(this, this.refresh));
+    const refresh_cb = () => {
+      this.refresh();
+    };
+    this.mixer_control.connect("default-source-changed", refresh_cb);
+    this.mixer_control.connect("stream-added", refresh_cb);
+    this.mixer_control.connect("stream-removed", refresh_cb);
     this.refresh();
   }
 
@@ -42,10 +41,9 @@ const Microphone = class Microphone {
     this.active = false;
     this.stream = this.mixer_control.get_default_source();
     if (this.stream) {
-      this.muted_changed_id = this.stream.connect(
-        "notify::is-muted",
-        Lang.bind(this, this.notify_muted)
-      );
+      this.muted_changed_id = this.stream.connect("notify::is-muted", () => {
+        this.notify_muted();
+      });
       let recording_apps = this.mixer_control.get_source_outputs();
       for (let i = 0; i < recording_apps.length; i++) {
         let output_stream = recording_apps[i];
