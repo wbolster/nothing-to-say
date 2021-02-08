@@ -165,10 +165,7 @@ function get_settings() {
   let schema = schema_source.lookup(schema_id, true);
   if (!schema)
     throw new Error(
-      "Schema " +
-        schema_id +
-        " could not be found for extension " +
-        extension.metadata.uuid
+      `Schema ${schema_id} could not be found for extension ${extension.metadata.uuid}`
     );
   return new Gio.Settings({ settings_schema: schema });
 }
