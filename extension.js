@@ -17,10 +17,8 @@ const EXCLUDED_APPLICATION_IDS = [
 
 let microphone;
 
-const Microphone = new Lang.Class({
-  Name: "Microphone",
-
-  _init: function () {
+const Microphone = class Microphone {
+  constructor() {
     this.active = null;
     this.stream = null;
     this.muted_changed_id = 0;
@@ -33,9 +31,9 @@ const Microphone = new Lang.Class({
     this.mixer_control.connect("stream-added", Lang.bind(this, this.refresh));
     this.mixer_control.connect("stream-removed", Lang.bind(this, this.refresh));
     this.refresh();
-  },
+  }
 
-  refresh: function () {
+  refresh() {
     // based on gnome-shell volume control
     if (this.stream && this.muted_changed_id) {
       this.stream.disconnect(this.muted_changed_id);
@@ -60,33 +58,33 @@ const Microphone = new Lang.Class({
     if (this.active != was_active) {
       this.emit("notify::active");
     }
-  },
+  }
 
-  destroy: function () {
+  destroy() {
     this.mixer_control.close();
-  },
+  }
 
-  notify_muted: function () {
+  notify_muted() {
     this.emit("notify::muted");
-  },
+  }
 
   get muted() {
     if (!this.stream) return true;
     return this.stream.is_muted;
-  },
+  }
 
   set muted(muted) {
     if (!this.stream) return;
     this.stream.change_is_muted(muted);
-  },
+  }
 
   get level() {
     if (!this.stream) return 0;
     return (
       (100 * this.stream.get_volume()) / this.mixer_control.get_vol_max_norm()
     );
-  },
-});
+  }
+};
 Signals.addSignalMethods(Microphone.prototype);
 
 function get_icon_name(muted) {
