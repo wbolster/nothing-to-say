@@ -124,7 +124,7 @@ function on_activate({ give_feedback }) {
       // keep osd visible
       show_osd(null, false, microphone.level);
     }
-    mute_timeout_id = Mainloop.timeout_add(100, function () {
+    mute_timeout_id = Mainloop.timeout_add(100, () => {
       mute_timeout_id = 0;
       microphone.muted = true;
       if (give_feedback) {
@@ -182,7 +182,7 @@ function enable() {
   panel_button.connect("button-press-event", () => {
     on_activate({ give_feedback: false });
   });
-  microphone.connect("notify::active", function () {
+  microphone.connect("notify::active", () => {
     panel_button.visible = icon_should_be_visible(microphone.active);
     if (initialised || microphone.active)
       show_osd(
@@ -191,7 +191,7 @@ function enable() {
       );
     initialised = true;
   });
-  microphone.connect("notify::muted", function () {
+  microphone.connect("notify::muted", () => {
     panel_icon.icon_name = get_icon_name(microphone.muted);
   });
   Main.panel._rightBox.insert_child_at_index(panel_button, 0);
@@ -204,7 +204,7 @@ function enable() {
       on_activate({ give_feedback: true });
     }
   );
-  settings.connect("changed::icon-visibility", function () {
+  settings.connect("changed::icon-visibility", () => {
     panel_button.visible = icon_should_be_visible(microphone.active);
   });
 }
