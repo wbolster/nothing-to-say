@@ -1,3 +1,5 @@
+"use strict";
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Gio = imports.gi.Gio;
 const Gvc = imports.gi.Gvc;
