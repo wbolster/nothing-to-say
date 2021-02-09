@@ -180,7 +180,7 @@ https://twitter.com/wbolster on twitter. follow me. or say hi.
 license
 =======
 
-© 2016–2020 wouter bolsterlee
+© 2016–2021 wouter bolsterlee
 
 licensed under gpl v2. see license file for details. contains code snippets originating from gnome-shell itself, which is also gpl v2.
 
