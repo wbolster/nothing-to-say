@@ -91,6 +91,7 @@ class Microphone {
 Signals.addSignalMethods(Microphone.prototype);
 
 function get_icon_name(muted) {
+  // TODO: use -low and -medium icons based on .level
   return muted
     ? "microphone-sensitivity-muted-symbolic"
     : "microphone-sensitivity-high-symbolic";
