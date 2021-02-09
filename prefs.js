@@ -20,7 +20,7 @@ function buildPrefsWidget() {
   const schema = schema_source.lookup(schema_id, true);
   this.settings = new Gio.Settings({ settings_schema: schema });
 
-  let prefsWidget = new Gtk.Grid({
+  const prefsWidget = new Gtk.Grid({
     margin: 18,
     column_spacing: 12,
     row_spacing: 12,
@@ -28,7 +28,7 @@ function buildPrefsWidget() {
   });
 
   // Keybindings label
-  let keybindingsLabel = new Gtk.Label({
+  const keybindingsLabel = new Gtk.Label({
     label: "Keybindings",
     halign: Gtk.Align.START,
     visible: true,
@@ -36,17 +36,17 @@ function buildPrefsWidget() {
   prefsWidget.attach(keybindingsLabel, 0, 1, 1, 1);
 
   // Keybindings widget
-  let listBox = new Gtk.ListBox({ selection_mode: 0, hexpand: true });
-  let keys = ["keybinding-toggle-mute"];
-  let keybindingsWidget = new KeybindingsWidget(keys, this.settings);
-  let keybindingsRow = new Gtk.ListBoxRow({ activatable: false });
+  const listBox = new Gtk.ListBox({ selection_mode: 0, hexpand: true });
+  const keys = ["keybinding-toggle-mute"];
+  const keybindingsWidget = new KeybindingsWidget(keys, this.settings);
+  const keybindingsRow = new Gtk.ListBoxRow({ activatable: false });
   keybindingsRow.add(keybindingsWidget);
   listBox.add(keybindingsRow);
   listBox.show_all();
   prefsWidget.attach(listBox, 1, 1, 1, 1);
 
   // Show top bar icon label
-  let iconVisibleLabel = new Gtk.Label({
+  const iconVisibleLabel = new Gtk.Label({
     label: "Show top bar icon",
     halign: Gtk.Align.START,
     visible: true,
@@ -54,7 +54,7 @@ function buildPrefsWidget() {
   prefsWidget.attach(iconVisibleLabel, 0, 2, 1, 1);
 
   // Show top bar icon combo box
-  let iconVisibleComboBox = new Gtk.ComboBoxText();
+  const iconVisibleComboBox = new Gtk.ComboBoxText();
   iconVisibleComboBox.append("when-recording", "When recording");
   iconVisibleComboBox.append("always", "Always");
   iconVisibleComboBox.append("never", "Never");
