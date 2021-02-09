@@ -19,6 +19,7 @@ const EXCLUDED_APPLICATION_IDS = [
 const KEYBINDING_KEY_NAME = "keybinding-toggle-mute";
 const MICROPHONE_ACTIVE_STYLE_CLASS = "screencast-indicator";
 
+let initialised = false; // flag to avoid notifications on startup
 let microphone;
 
 class Microphone {
@@ -160,7 +161,6 @@ const settings = get_settings();
 function init() {}
 
 let panel_button, panel_icon;
-let initialised = false; // flag to avoid notifications on startup
 
 function enable() {
   microphone = new Microphone();
