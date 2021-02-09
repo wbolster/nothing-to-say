@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
@@ -8,7 +8,7 @@ const KeybindingsWidget = new GObject.Class({
   Name: `KeybindingsWidget`,
   Extends: Gtk.Box,
 
-  _init: function(settingKeys, settings) {
+  _init: function (settingKeys, settings) {
     this._settingKeys = settingKeys;
     this._settings = settings;
 
@@ -18,7 +18,7 @@ const KeybindingsWidget = new GObject.Class({
       NAME: 0,
       ACCEL_NAME: 1,
       MODS: 2,
-      KEY: 3
+      KEY: 3,
     };
 
     this._store = new Gtk.ListStore();
@@ -26,13 +26,13 @@ const KeybindingsWidget = new GObject.Class({
       GObject.TYPE_STRING,
       GObject.TYPE_STRING,
       GObject.TYPE_INT,
-      GObject.TYPE_INT
+      GObject.TYPE_INT,
     ]);
 
     this._tree_view = new Gtk.TreeView({
       model: this._store,
       hexpand: false,
-      vexpand: false
+      vexpand: false,
     });
 
     let action_renderer = new Gtk.CellRendererText();
@@ -41,20 +41,19 @@ const KeybindingsWidget = new GObject.Class({
       expand: true,
     });
     action_column.pack_start(action_renderer, true);
-    action_column.add_attribute(action_renderer, 'text', 1);
+    action_column.add_attribute(action_renderer, "text", 1);
     this._tree_view.append_column(action_column);
 
     let keybinding_renderer = new Gtk.CellRendererAccel({
       editable: true,
       accel_mode: Gtk.CellRendererAccelMode.GTK,
-      xalign: 1
+      xalign: 1,
     });
-    keybinding_renderer.connect('accel-edited', (renderer, iter, key, mods) => {
+    keybinding_renderer.connect("accel-edited", (renderer, iter, key, mods) => {
       let value = Gtk.accelerator_name(key, mods);
-      let [success, iterator ] =
-          this._store.get_iter_from_string(iter);
+      let [success, iterator] = this._store.get_iter_from_string(iter);
 
-      if(!success) {
+      if (!success) {
         printerr("Can't change keybinding");
       }
 
@@ -74,12 +73,12 @@ const KeybindingsWidget = new GObject.Class({
     keybinding_column.pack_end(keybinding_renderer, false);
     keybinding_column.add_attribute(
       keybinding_renderer,
-      'accel-mods',
+      "accel-mods",
       this._columns.MODS
     );
     keybinding_column.add_attribute(
       keybinding_renderer,
-      'accel-key',
+      "accel-key",
       this._columns.KEY
     );
     this._tree_view.append_column(keybinding_column);
@@ -89,14 +88,13 @@ const KeybindingsWidget = new GObject.Class({
     this.add(this._tree_view);
     this.keybinding_column = keybinding_column;
 
-    this._settings.connect('changed', this._onSettingsChanged.bind(this));
+    this._settings.connect("changed", this._onSettingsChanged.bind(this));
     this._refresh();
   },
 
   // Support the case where all the settings has been reset.
-  _onSettingsChanged: function() {
-    if (this._refreshTimeout)
-      GLib.source_remove(this._refreshTimeout);
+  _onSettingsChanged: function () {
+    if (this._refreshTimeout) GLib.source_remove(this._refreshTimeout);
 
     this._refreshTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
       this._refreshTimeout = 0;
@@ -104,12 +102,12 @@ const KeybindingsWidget = new GObject.Class({
     });
   },
 
-  _refresh: function() {
+  _refresh: function () {
     this._store.clear();
 
-    this._settingKeys.forEach(settingKey => {
+    this._settingKeys.forEach((settingKey) => {
       let [key, mods] = Gtk.accelerator_parse(
-        this._settings.get_strv(settingKey)[0] || ''
+        this._settings.get_strv(settingKey)[0] || ""
       );
 
       let iter = this._store.append();
@@ -119,15 +117,15 @@ const KeybindingsWidget = new GObject.Class({
           this._columns.NAME,
           this._columns.ACCEL_NAME,
           this._columns.MODS,
-          this._columns.KEY
+          this._columns.KEY,
         ],
         [
           settingKey,
           this._settings.settings_schema.get_key(settingKey).get_summary(),
           mods,
-          key
+          key,
         ]
       );
     });
-  }
+  },
 });
