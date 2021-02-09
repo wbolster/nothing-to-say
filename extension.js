@@ -8,6 +8,8 @@ const Shell = imports.gi.Shell;
 const Signals = imports.signals;
 const St = imports.gi.St;
 
+const CurrentExtension = ExtensionUtils.getCurrentExtension();
+
 const KEYBINDING_KEY_NAME = "keybinding-toggle-mute";
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
@@ -135,25 +137,16 @@ function on_activate({ give_feedback }) {
 }
 
 function get_settings() {
-  let extension = ExtensionUtils.getCurrentExtension();
-  let schema_dir = extension.dir.get_child("schemas");
-  let schema_source;
-  if (schema_dir.query_exists(null)) {
-    // local install
-    schema_source = Gio.SettingsSchemaSource.new_from_directory(
-      schema_dir.get_path(),
-      Gio.SettingsSchemaSource.get_default(),
-      false
-    );
-  } else {
-    // global install (same prefix as gnome-shell)
-    schema_source = Gio.SettingsSchemaSource.get_default();
-  }
-  let schema_id = extension.metadata["settings-schema"];
-  let schema = schema_source.lookup(schema_id, true);
+  const schema_source = Gio.SettingsSchemaSource.new_from_directory(
+    CurrentExtension.dir.get_child("schemas").get_path(),
+    Gio.SettingsSchemaSource.get_default(),
+    false
+  );
+  const schema_id = CurrentExtension.metadata["settings-schema"];
+  const schema = schema_source.lookup(schema_id, true);
   if (!schema)
     throw new Error(
-      `Schema ${schema_id} could not be found for extension ${extension.metadata.uuid}`
+      `Schema ${schema_id} could not be found for extension ${CurrentExtension.metadata.uuid}`
     );
   return new Gio.Settings({ settings_schema: schema });
 }
