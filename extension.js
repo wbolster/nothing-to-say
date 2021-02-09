@@ -10,7 +10,7 @@ const Shell = imports.gi.Shell;
 const Signals = imports.signals;
 const St = imports.gi.St;
 
-const CurrentExtension = ExtensionUtils.getCurrentExtension();
+const Extension = ExtensionUtils.getCurrentExtension();
 
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
@@ -142,15 +142,15 @@ function on_activate({ give_feedback }) {
 
 function get_settings() {
   const schema_source = Gio.SettingsSchemaSource.new_from_directory(
-    CurrentExtension.dir.get_child("schemas").get_path(),
+    Extension.dir.get_child("schemas").get_path(),
     Gio.SettingsSchemaSource.get_default(),
     false
   );
-  const schema_id = CurrentExtension.metadata["settings-schema"];
+  const schema_id = Extension.metadata["settings-schema"];
   const schema = schema_source.lookup(schema_id, true);
   if (!schema)
     throw new Error(
-      `Schema ${schema_id} could not be found for extension ${CurrentExtension.metadata.uuid}`
+      `Schema ${schema_id} could not be found for extension ${Extension.metadata.uuid}`
     );
   return new Gio.Settings({ settings_schema: schema });
 }
