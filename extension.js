@@ -19,7 +19,7 @@ const MICROPHONE_ACTIVE_STYLE_CLASS = "screencast-indicator";
 
 let microphone;
 
-const Microphone = class Microphone {
+class Microphone {
   constructor() {
     this.active = null;
     this.stream = null;
@@ -85,7 +85,7 @@ const Microphone = class Microphone {
       (100 * this.stream.get_volume()) / this.mixer_control.get_vol_max_norm()
     );
   }
-};
+}
 Signals.addSignalMethods(Microphone.prototype);
 
 function get_icon_name(muted) {
