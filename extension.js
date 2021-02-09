@@ -2,10 +2,12 @@
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Gio = imports.gi.Gio;
+const GObject = imports.gi.GObject;
 const Gvc = imports.gi.Gvc;
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
 const Meta = imports.gi.Meta;
+const PanelMenu = imports.ui.panelMenu;
 const Shell = imports.gi.Shell;
 const Signals = imports.signals;
 const St = imports.gi.St;
@@ -21,6 +23,7 @@ const MICROPHONE_ACTIVE_STYLE_CLASS = "screencast-indicator";
 
 let initialised = false; // flag to avoid notifications on startup
 let microphone;
+let panel_button;
 
 class Microphone {
   constructor() {
@@ -91,6 +94,22 @@ class Microphone {
 }
 Signals.addSignalMethods(Microphone.prototype);
 
+const MicrophonePanelButton = GObject.registerClass(
+  class extends PanelMenu.Button {
+    _init() {
+      super._init(0.0, `${Extension.metadata.name} panel indicator`, false);
+      this.icon = new St.Icon({
+        icon_name: get_icon_name(false),
+        style_class: "system-status-icon",
+      });
+      this.add_child(this.icon);
+      this.connect("button-press-event", () => {
+        on_activate({ give_feedback: false });
+      });
+    }
+  }
+);
+
 function get_icon_name(muted) {
   // TODO: use -low and -medium icons based on .level
   return muted
@@ -160,25 +179,10 @@ const settings = get_settings();
 
 function init() {}
 
-let panel_button, panel_icon;
-
 function enable() {
   microphone = new Microphone();
-  panel_icon = new St.Icon({
-    icon_name: get_icon_name(false),
-    style_class: "system-status-icon",
-  });
-  panel_button = new St.Bin({
-    style_class: "panel-button",
-    reactive: true,
-    can_focus: true,
-    track_hover: true,
-    visible: icon_should_be_visible(microphone.active),
-  });
-  panel_button.set_child(panel_icon);
-  panel_button.connect("button-press-event", () => {
-    on_activate({ give_feedback: false });
-  });
+  panel_button = new MicrophonePanelButton();
+  panel_button.visible = icon_should_be_visible(microphone.active);
   Main.panel.addToStatusArea(
     `${Extension.metadata.name} indicator`,
     panel_button,
@@ -187,9 +191,9 @@ function enable() {
   );
   microphone.connect("notify::active", () => {
     if (microphone.active) {
-      panel_icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
+      panel_button.icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
     } else {
-      panel_icon.remove_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
+      panel_button.icon.remove_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
     }
     panel_button.visible = icon_should_be_visible(microphone.active);
     if (initialised || microphone.active)
@@ -200,7 +204,7 @@ function enable() {
     initialised = true;
   });
   microphone.connect("notify::muted", () => {
-    panel_icon.icon_name = get_icon_name(microphone.muted);
+    panel_button.icon.icon_name = get_icon_name(microphone.muted);
   });
   Main.wm.addKeybinding(
     KEYBINDING_KEY_NAME,
@@ -221,8 +225,6 @@ function disable() {
   Main.panel._rightBox.remove_child(panel_button);
   microphone.destroy();
   microphone = null;
-  panel_icon.destroy();
-  panel_icon = null;
   panel_button.destroy();
   panel_button = null;
 }
