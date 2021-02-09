@@ -47,8 +47,8 @@ const Microphone = class Microphone {
       let recording_apps = this.mixer_control.get_source_outputs();
       for (let i = 0; i < recording_apps.length; i++) {
         let output_stream = recording_apps[i];
-        let id = output_stream.get_application_id();
-        if (EXCLUDED_APPLICATION_IDS.includes(id)) continue;
+        let application_id = output_stream.get_application_id();
+        if (EXCLUDED_APPLICATION_IDS.includes(application_id)) continue;
         this.active = true;
       }
     }
