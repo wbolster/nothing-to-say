@@ -179,6 +179,12 @@ function enable() {
   panel_button.connect("button-press-event", () => {
     on_activate({ give_feedback: false });
   });
+  Main.panel.addToStatusArea(
+    `${Extension.metadata.name} indicator`,
+    panel_button,
+    0,
+    "right"
+  );
   microphone.connect("notify::active", () => {
     if (microphone.active) {
       panel_icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
@@ -196,7 +202,6 @@ function enable() {
   microphone.connect("notify::muted", () => {
     panel_icon.icon_name = get_icon_name(microphone.muted);
   });
-  Main.panel._rightBox.insert_child_at_index(panel_button, 0);
   Main.wm.addKeybinding(
     KEYBINDING_KEY_NAME,
     settings,
