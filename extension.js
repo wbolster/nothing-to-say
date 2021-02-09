@@ -183,12 +183,8 @@ function enable() {
   microphone = new Microphone();
   panel_button = new MicrophonePanelButton();
   panel_button.visible = icon_should_be_visible(microphone.active);
-  Main.panel.addToStatusArea(
-    `${Extension.metadata.name} indicator`,
-    panel_button,
-    0,
-    "right"
-  );
+  const indicatorName = `${Extension.metadata.name} indicator`;
+  Main.panel.addToStatusArea(indicatorName, panel_button, 0, "right");
   microphone.connect("notify::active", () => {
     if (microphone.active) {
       panel_button.icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
