@@ -10,11 +10,12 @@ const St = imports.gi.St;
 
 const CurrentExtension = ExtensionUtils.getCurrentExtension();
 
-const KEYBINDING_KEY_NAME = "keybinding-toggle-mute";
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
   "org.PulseAudio.pavucontrol",
 ];
+const KEYBINDING_KEY_NAME = "keybinding-toggle-mute";
+const MICROPHONE_ACTIVE_STYLE_CLASS = "screencast-indicator";
 
 let microphone;
 
@@ -176,6 +177,11 @@ function enable() {
     on_activate({ give_feedback: false });
   });
   microphone.connect("notify::active", () => {
+    if (microphone.active) {
+      panel_icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
+    } else {
+      panel_icon.remove_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
+    }
     panel_button.visible = icon_should_be_visible(microphone.active);
     if (initialised || microphone.active)
       show_osd(
