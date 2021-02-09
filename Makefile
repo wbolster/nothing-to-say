@@ -1,4 +1,4 @@
-.PHONY: zip
+.PHONY: zip compile-schemas
 
 zip: compile-schemas
 	zip gnome-shell-extension-nothing-to-say-$$(jq .version metadata.json).zip \
