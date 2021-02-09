@@ -11,17 +11,14 @@ const KeybindingsWidget = Extension.imports.keybindingsWidget.KeybindingsWidget;
 function init() {}
 
 function buildPrefsWidget() {
-  let gschema = Gio.SettingsSchemaSource.new_from_directory(
+  const schema_source = Gio.SettingsSchemaSource.new_from_directory(
     Extension.dir.get_child("schemas").get_path(),
     Gio.SettingsSchemaSource.get_default(),
     false
   );
-  this.settings = new Gio.Settings({
-    settings_schema: gschema.lookup(
-      "org.gnome.shell.extensions.nothing-to-say",
-      true
-    ),
-  });
+  const schema_id = Extension.metadata["settings-schema"];
+  const schema = schema_source.lookup(schema_id, true);
+  this.settings = new Gio.Settings({ settings_schema: schema });
 
   let prefsWidget = new Gtk.Grid({
     margin: 18,
