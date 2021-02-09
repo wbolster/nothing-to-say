@@ -168,7 +168,7 @@ let initialised = false; // flag to avoid notifications on startup
 function enable() {
   microphone = new Microphone();
   panel_icon = new St.Icon({
-    icon_name: "",
+    icon_name: get_icon_name(false),
     style_class: "system-status-icon",
   });
   panel_button = new St.Bin({
