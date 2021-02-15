@@ -95,6 +95,7 @@ class Microphone {
 Signals.addSignalMethods(Microphone.prototype);
 
 const MicrophonePanelButton = GObject.registerClass(
+  { GTypeName: "MicrophonePanelButton" },
   class extends PanelMenu.Button {
     _init() {
       super._init(0.0, `${Extension.metadata.name} panel indicator`, false);
