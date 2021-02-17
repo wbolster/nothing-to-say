@@ -207,7 +207,7 @@ function enable() {
     KEYBINDING_KEY_NAME,
     settings,
     Meta.KeyBindingFlags.NONE,
-    Shell.ActionMode.NORMAL,
+    Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
     () => {
       on_activate({ give_feedback: true });
     }
