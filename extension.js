@@ -2,10 +2,10 @@
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
 const Gvc = imports.gi.Gvc;
 const Main = imports.ui.main;
-const Mainloop = imports.mainloop;
 const Meta = imports.gi.Meta;
 const PanelMenu = imports.ui.panelMenu;
 const Shell = imports.gi.Shell;
@@ -147,11 +147,11 @@ function on_activate({ give_feedback }) {
   } else {
     // use a delay before muting; this makes push-to-talk work
     if (mute_timeout_id) {
-      Mainloop.source_remove(mute_timeout_id);
+      GLib.Source.remove(mute_timeout_id);
       // keep osd visible
       show_osd(null, false, microphone.level);
     }
-    mute_timeout_id = Mainloop.timeout_add(100, () => {
+    mute_timeout_id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
       mute_timeout_id = 0;
       microphone.muted = true;
       if (give_feedback) {
