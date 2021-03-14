@@ -87,6 +87,28 @@ function buildPrefsWidget() {
     Gio.SettingsBindFlags.DEFAULT
   );
 
+  // Feedback sounds label
+  const feedbackSoundsLabel = new Gtk.Label({
+    label: "Play sound when muting and unmuting",
+    halign: Gtk.Align.START,
+    visible: true
+  });
+  prefsWidget.attach(feedbackSoundsLabel, 0, 4, 1, 1);
+
+  // Feedback sounds switch
+  const feedbackSoundsSwitch = new Gtk.Switch({
+    active: settings.get_boolean("play-feedback-sounds"),
+    halign: Gtk.Align.END,
+    visible: true,
+  });
+  this.settings.bind(
+    "play-feedback-sounds",
+    feedbackSoundsSwitch,
+    "active",
+    Gio.SettingsBindFlags.DEFAULT
+  );
+  prefsWidget.attach(feedbackSoundsSwitch, 1, 4, 1, 1);
+
   if(GTK_VERSION == 3) {
     prefsWidget.show_all();
   }
