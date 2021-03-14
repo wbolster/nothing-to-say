@@ -16,5 +16,10 @@
       <summary>Mute or unmute</summary>
       <description>These shortcut keys will mute or unmute the microphone when pressed once, and will act as a push-to-talk button when held down.</description>
     </key>
+    <key type="b" name="play-feedback-sounds">
+      <default>true</default>
+      <summary>Play feesback sounds</summary>
+      <description>Play sounds when the microphone is muted and unmuted.</description>
+    </key>
   </schema>
 </schemalist>

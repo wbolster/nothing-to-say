@@ -66,6 +66,26 @@ function buildPrefsWidget() {
   );
   prefsWidget.attach(iconVisibleComboBox, 1, 2, 1, 1);
 
+  // Feedback sounds label
+  const feedbackSoundsLabel = new Gtk.Label({
+    label: "Play sound on mute and unmute",
+    halign: Gtk.Align.START,
+    visible: true
+  });
+  prefsWidget.attach(feedbackSoundsLabel, 0, 3, 1, 1);
+
+  // Feedback sounds switch
+  const feedbackSoundsSwitch = new Gtk.Switch({
+    active: settings.get_boolean("play-feedback-sounds")
+  });
+  feedbackSoundsSwitch.connect("notify::active", button => {
+    settings.set_boolean("play-feedback-sounds", button.active);
+  });
+  // Wrap switch in box to not stretch it.
+  const box = new Gtk.HBox();
+  box.pack_end(feedbackSoundsSwitch, false, false, 0);
+  prefsWidget.attach(box, 1, 3, 1, 1);
+
   prefsWidget.show_all();
 
   return prefsWidget;

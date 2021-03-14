@@ -4,6 +4,8 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
+const Gst = imports.gi.Gst;
+const GstAudio = imports.gi.GstAudio;
 const Gvc = imports.gi.Gvc;
 const Main = imports.ui.main;
 const Meta = imports.gi.Meta;
@@ -38,6 +40,9 @@ class Microphone {
     this.mixer_control.connect("default-source-changed", refresh_cb);
     this.mixer_control.connect("stream-added", refresh_cb);
     this.mixer_control.connect("stream-removed", refresh_cb);
+    Gst.init(null);
+    this.on_sound = init_sound("on");
+    this.off_sound = init_sound("off");
     this.refresh();
   }
 
@@ -105,11 +110,22 @@ const MicrophonePanelButton = GObject.registerClass(
       });
       this.add_child(this.icon);
       this.connect("button-press-event", () => {
-        on_activate({ give_feedback: false });
+        on_activate({ show_feedback: false });
       });
     }
   }
 );
+
+function init_sound(name) {
+  const playbin = Gst.ElementFactory.make("playbin", null);
+  const path = Extension.dir.get_child(`sounds/${name}.ogg`).get_path();
+  const uri = Gst.filename_to_uri(path);
+  playbin.set_property("uri", uri);
+  const sink = Gst.ElementFactory.make("pulsesink", "sink");
+  playbin.set_property("audio-sink", sink);
+  playbin.set_volume(GstAudio.StreamVolumeFormat.LINEAR, 0.5);
+  return playbin;
+}
 
 function get_icon_name(muted) {
   // TODO: use -low and -medium icons based on .level
@@ -138,11 +154,14 @@ function show_osd(text, muted, level) {
 
 let mute_timeout_id = 0;
 
-function on_activate({ give_feedback }) {
+function on_activate({ show_feedback }) {
   if (microphone.muted) {
     microphone.muted = false;
-    if (give_feedback) {
+    if (show_feedback) {
       show_osd(null, false, microphone.level);
+    }
+    if(settings.get_boolean("play-feedback-sounds")) {
+      play_sound(microphone.on_sound);
     }
   } else {
     // use a delay before muting; this makes push-to-talk work
@@ -154,11 +173,24 @@ function on_activate({ give_feedback }) {
     mute_timeout_id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
       mute_timeout_id = 0;
       microphone.muted = true;
-      if (give_feedback) {
+      if (show_feedback) {
         show_osd(null, true, 0);
+        }
+        if(settings.get_boolean("play-feedback-sounds")) {
+          play_sound(microphone.off_sound);
       }
     });
   }
+}
+
+function play_sound(sound) {
+  // Rewind in case the sound has played already.
+  sound.seek_simple(
+    Gst.Format.TIME,
+    Gst.SeekFlags.FLUSH | Gst.SeekFlags.SEGMENT,
+    0
+  );
+  sound.set_state(Gst.State.PLAYING);
 }
 
 function get_settings() {
@@ -209,7 +241,7 @@ function enable() {
     Meta.KeyBindingFlags.NONE,
     Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
     () => {
-      on_activate({ give_feedback: true });
+      on_activate({ show_feedback: true });
     }
   );
   settings.connect("changed::icon-visibility", () => {
