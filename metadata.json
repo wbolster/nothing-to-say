@@ -3,11 +3,9 @@
     "description": "Unmute the microphone only when you have something to say.",
     "uuid": "nothing-to-say@extensions.gnome.wouter.bolsterl.ee",
     "shell-version": [
-        "3.34",
-        "3.36",
-        "3.38"
+        "40"
     ],
     "settings-schema": "org.gnome.shell.extensions.nothing-to-say",
     "url": "https://github.com/wbolster/nothing-to-say",
-    "version": 10
+    "version": 11
 }

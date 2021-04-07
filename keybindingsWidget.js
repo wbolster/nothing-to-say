@@ -85,7 +85,7 @@ const KeybindingsWidget = new GObject.Class({
     this._tree_view.columns_autosize();
     this._tree_view.set_headers_visible(false);
 
-    this.add(this._tree_view);
+    this.append(this._tree_view);
     this.keybinding_column = keybinding_column;
 
     this._settings.connect("changed", this._onSettingsChanged.bind(this));

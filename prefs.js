@@ -21,7 +21,6 @@ function buildPrefsWidget() {
   this.settings = new Gio.Settings({ settings_schema: schema });
 
   const prefsWidget = new Gtk.Grid({
-    margin: 18,
     column_spacing: 12,
     row_spacing: 12,
     visible: true,
@@ -40,9 +39,8 @@ function buildPrefsWidget() {
   const keys = ["keybinding-toggle-mute"];
   const keybindingsWidget = new KeybindingsWidget(keys, this.settings);
   const keybindingsRow = new Gtk.ListBoxRow({ activatable: false });
-  keybindingsRow.add(keybindingsWidget);
-  listBox.add(keybindingsRow);
-  listBox.show_all();
+  keybindingsRow.set_child(keybindingsWidget);
+  listBox.append(keybindingsRow, 0);
   prefsWidget.attach(listBox, 1, 1, 1, 1);
 
   // Show top bar icon label
@@ -65,8 +63,5 @@ function buildPrefsWidget() {
     Gio.SettingsBindFlags.DEFAULT
   );
   prefsWidget.attach(iconVisibleComboBox, 1, 2, 1, 1);
-
-  prefsWidget.show_all();
-
   return prefsWidget;
 }
