@@ -161,22 +161,7 @@ function on_activate({ give_feedback }) {
   }
 }
 
-function get_settings() {
-  const schema_source = Gio.SettingsSchemaSource.new_from_directory(
-    Extension.dir.get_child("schemas").get_path(),
-    Gio.SettingsSchemaSource.get_default(),
-    false
-  );
-  const schema_id = Extension.metadata["settings-schema"];
-  const schema = schema_source.lookup(schema_id, true);
-  if (!schema)
-    throw new Error(
-      `Schema ${schema_id} could not be found for extension ${Extension.metadata.uuid}`
-    );
-  return new Gio.Settings({ settings_schema: schema });
-}
-
-const settings = get_settings();
+const settings = ExtensionUtils.getSettings();
 
 function init() {}
 
