@@ -16,5 +16,10 @@
       <summary>Mute or unmute</summary>
       <description>These shortcut keys will mute or unmute the microphone when pressed once, and will act as a push-to-talk button when held down.</description>
     </key>
+    <key name="show-osd" type="b">
+      <default>true</default>
+      <summary>Whether to show OSD notification</summary>
+      <description>This specifies whether to show OSD notification.</description>
+    </key>
   </schema>
 </schemalist>

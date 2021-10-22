@@ -56,5 +56,27 @@ function buildPrefsWidget() {
     Gio.SettingsBindFlags.DEFAULT
   );
   prefsWidget.attach(iconVisibleComboBox, 1, 2, 1, 1);
+
+  const showOSDLabel = new Gtk.Label({
+    label: "Whether to show OSD notification",
+    halign: Gtk.Align.START,
+    visible: true,
+  });
+  prefsWidget.attach(showOSDLabel, 0, 3, 1, 1);
+
+  let toggleOSD = new Gtk.Switch({
+    active: this.settings.get_boolean("show-osd"),
+    halign: Gtk.Align.END,
+    visible: true,
+  });
+  prefsWidget.attach(toggleOSD, 1, 3, 1, 1);
+
+  this.settings.bind(
+    "show-osd",
+    toggleOSD,
+    "active",
+    Gio.SettingsBindFlags.DEFAULT
+  );
+
   return prefsWidget;
 }

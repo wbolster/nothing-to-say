@@ -148,8 +148,10 @@ function on_activate({ give_feedback }) {
     // use a delay before muting; this makes push-to-talk work
     if (mute_timeout_id) {
       GLib.Source.remove(mute_timeout_id);
-      // keep osd visible
-      show_osd(null, false, microphone.level);
+      if (give_feedback) {
+        // keep osd visible
+        show_osd(null, false, microphone.level);
+      }
     }
     mute_timeout_id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
       mute_timeout_id = 0;
@@ -194,7 +196,7 @@ function enable() {
     Meta.KeyBindingFlags.NONE,
     Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
     () => {
-      on_activate({ give_feedback: true });
+      on_activate({ give_feedback: settings.get_boolean("show-osd") });
     }
   );
   settings.connect("changed::icon-visibility", () => {
