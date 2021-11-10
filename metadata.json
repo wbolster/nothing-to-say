@@ -3,7 +3,8 @@
   "name": "Nothing to say",
   "settings-schema": "org.gnome.shell.extensions.nothing-to-say",
   "shell-version": [
-    "40"
+    "40",
+    "41"
   ],
   "url": "https://github.com/wbolster/nothing-to-say",
   "uuid": "nothing-to-say@extensions.gnome.wouter.bolsterl.ee",
