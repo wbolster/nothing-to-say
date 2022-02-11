@@ -8,12 +8,15 @@ const Extension = ExtensionUtils.getCurrentExtension();
 
 const KeybindingsWidget = Extension.imports.keybindingsWidget.KeybindingsWidget;
 
+const GTK_VERSION = Gtk.get_major_version();
+
 function init() {}
 
 function buildPrefsWidget() {
   this.settings = ExtensionUtils.getSettings();
 
   const prefsWidget = new Gtk.Grid({
+    margin: 18,
     column_spacing: 12,
     row_spacing: 12,
     visible: true,
@@ -32,8 +35,14 @@ function buildPrefsWidget() {
   const keys = ["keybinding-toggle-mute"];
   const keybindingsWidget = new KeybindingsWidget(keys, this.settings);
   const keybindingsRow = new Gtk.ListBoxRow({ activatable: false });
-  keybindingsRow.set_child(keybindingsWidget);
-  listBox.append(keybindingsRow, 0);
+  if(GTK_VERSION == 3) {
+    keybindingsRow.add(keybindingsWidget);
+    listBox.add(keybindingsRow);
+    listBox.show_all();
+  } else {
+    keybindingsRow.set_child(keybindingsWidget);
+    listBox.append(keybindingsRow, 0);
+  }
   prefsWidget.attach(listBox, 1, 1, 1, 1);
 
   // Show top bar icon label
@@ -77,6 +86,10 @@ function buildPrefsWidget() {
     "active",
     Gio.SettingsBindFlags.DEFAULT
   );
+
+  if(GTK_VERSION == 3) {
+    prefsWidget.show_all();
+  }
 
   return prefsWidget;
 }
