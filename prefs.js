@@ -15,12 +15,15 @@ function init() {}
 function buildPrefsWidget() {
   this.settings = ExtensionUtils.getSettings();
 
-  const prefsWidget = new Gtk.Grid({
-    margin: 18,
+  let gridProperties = {
     column_spacing: 12,
     row_spacing: 12,
     visible: true,
-  });
+  };
+  if (GTK_VERSION == 3) {
+    gridProperties.margin = 18;
+  }
+  const prefsWidget = new Gtk.Grid(gridProperties);
 
   // Keybindings label
   const keybindingsLabel = new Gtk.Label({
@@ -35,7 +38,7 @@ function buildPrefsWidget() {
   const keys = ["keybinding-toggle-mute"];
   const keybindingsWidget = new KeybindingsWidget(keys, this.settings);
   const keybindingsRow = new Gtk.ListBoxRow({ activatable: false });
-  if(GTK_VERSION == 3) {
+  if (GTK_VERSION == 3) {
     keybindingsRow.add(keybindingsWidget);
     listBox.add(keybindingsRow);
     listBox.show_all();
@@ -109,7 +112,7 @@ function buildPrefsWidget() {
   );
   prefsWidget.attach(feedbackSoundsSwitch, 1, 4, 1, 1);
 
-  if(GTK_VERSION == 3) {
+  if (GTK_VERSION == 3) {
     prefsWidget.show_all();
   }
 

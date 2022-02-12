@@ -6,7 +6,7 @@ const Gtk = imports.gi.Gtk;
 
 const GTK_VERSION = Gtk.get_major_version();
 
-const KeybindingsWidget = new GObject.Class({
+var KeybindingsWidget = new GObject.Class({
   Name: `KeybindingsWidget`,
   Extends: Gtk.Box,
 
@@ -87,7 +87,7 @@ const KeybindingsWidget = new GObject.Class({
     this._tree_view.columns_autosize();
     this._tree_view.set_headers_visible(false);
 
-    if(GTK_VERSION == 3) {
+    if (GTK_VERSION == 3) {
       this.add(this._tree_view);
     } else {
       this.append(this._tree_view);

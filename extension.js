@@ -160,7 +160,7 @@ function on_activate({ give_feedback }) {
     if (give_feedback) {
       show_osd(null, false, microphone.level);
     }
-    if(settings.get_boolean("play-feedback-sounds")) {
+    if (settings.get_boolean("play-feedback-sounds")) {
       play_sound(microphone.on_sound);
     }
   } else {
@@ -178,7 +178,7 @@ function on_activate({ give_feedback }) {
       if (give_feedback) {
         show_osd(null, true, 0);
       }
-      if(settings.get_boolean("play-feedback-sounds")) {
+      if (settings.get_boolean("play-feedback-sounds")) {
         play_sound(microphone.off_sound);
       }
     });
