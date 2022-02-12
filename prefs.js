@@ -112,7 +112,7 @@ function buildPrefsWidget() {
   );
   prefsWidget.attach(feedbackSoundsSwitch, 1, 4, 1, 1);
 
-  if(GTK_VERSION == 3) {
+  if (GTK_VERSION == 3) {
     prefsWidget.show_all();
   }
 
