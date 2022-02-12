@@ -187,11 +187,7 @@ function on_activate({ give_feedback }) {
 
 function play_sound(sound) {
   // Rewind in case the sound has played already.
-  sound.seek_simple(
-    Gst.Format.TIME,
-    Gst.SeekFlags.FLUSH | Gst.SeekFlags.SEGMENT,
-    0
-  );
+  sound.set_state(Gst.State.NULL);
   sound.set_state(Gst.State.PLAYING);
 }
 
