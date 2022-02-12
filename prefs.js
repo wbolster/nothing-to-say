@@ -44,7 +44,7 @@ function buildPrefsWidget() {
     listBox.show_all();
   } else {
     keybindingsRow.set_child(keybindingsWidget);
-    listBox.append(keybindingsRow, 0);
+    listBox.append(keybindingsRow);
   }
   prefsWidget.attach(listBox, 1, 1, 1, 1);
 
