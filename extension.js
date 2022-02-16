@@ -208,7 +208,7 @@ function enable() {
       panel_button.icon.remove_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
     }
     panel_button.visible = icon_should_be_visible(microphone.active);
-    if (initialised || microphone.active)
+    if (settings.get_boolean("show-osd") && (initialised || microphone.active))
       show_osd(
         microphone.active ? "Microphone activated" : "Microphone deactivated",
         microphone.muted
