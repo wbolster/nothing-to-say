@@ -24,6 +24,7 @@ const KEYBINDING_KEY_NAME = "keybinding-toggle-mute";
 const MICROPHONE_ACTIVE_STYLE_CLASS = "screencast-indicator";
 
 let initialised = false; // flag to avoid notifications on startup
+let settings = null;
 let microphone;
 let panel_button;
 
@@ -152,7 +153,7 @@ function show_osd(text, muted, level) {
   Main.osdWindowManager.show(monitor, icon, text, level);
 }
 
-let mute_timeout_id = 0;
+let mute_timeout_id = null;
 
 function on_activate({ give_feedback }) {
   if (microphone.muted) {
@@ -173,7 +174,7 @@ function on_activate({ give_feedback }) {
       }
     }
     mute_timeout_id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
-      mute_timeout_id = 0;
+      mute_timeout_id = null;
       microphone.muted = true;
       if (give_feedback) {
         show_osd(null, true, 0);
@@ -191,11 +192,10 @@ function play_sound(sound) {
   sound.set_state(Gst.State.PLAYING);
 }
 
-const settings = ExtensionUtils.getSettings();
-
 function init() {}
 
 function enable() {
+  settings = ExtensionUtils.getSettings();
   microphone = new Microphone();
   panel_button = new MicrophonePanelButton();
   panel_button.visible = icon_should_be_visible(microphone.active);
@@ -235,8 +235,13 @@ function enable() {
 function disable() {
   Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
   Main.panel._rightBox.remove_child(panel_button);
+  settings = null;
   microphone.destroy();
   microphone = null;
   panel_button.destroy();
   panel_button = null;
+  if (mute_timeout_id) {
+    GLib.Source.remove(mute_timeout_id);
+    mute_timeout_id = null;
+  }
 }
