@@ -3,6 +3,7 @@
   "name": "Nothing to say",
   "settings-schema": "org.gnome.shell.extensions.nothing-to-say",
   "shell-version": [
+    "3.36.9",
     "40",
     "41"
   ],

@@ -21,5 +21,10 @@
       <summary>Whether to show OSD notification</summary>
       <description>This specifies whether to show OSD notification.</description>
     </key>
+    <key name="play-feedback-sounds" type="b">
+      <default>true</default>
+      <summary>Play sound when muting and unmuting</summary>
+      <description>Play sounds when the microphone is muted and unmuted.</description>
+    </key>
   </schema>
 </schemalist>

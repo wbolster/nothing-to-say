@@ -8,16 +8,22 @@ const Extension = ExtensionUtils.getCurrentExtension();
 
 const KeybindingsWidget = Extension.imports.keybindingsWidget.KeybindingsWidget;
 
+const GTK_VERSION = Gtk.get_major_version();
+
 function init() {}
 
 function buildPrefsWidget() {
   this.settings = ExtensionUtils.getSettings();
 
-  const prefsWidget = new Gtk.Grid({
+  let gridProperties = {
     column_spacing: 12,
     row_spacing: 12,
     visible: true,
-  });
+  };
+  if (GTK_VERSION == 3) {
+    gridProperties.margin = 18;
+  }
+  const prefsWidget = new Gtk.Grid(gridProperties);
 
   // Keybindings label
   const keybindingsLabel = new Gtk.Label({
@@ -32,8 +38,14 @@ function buildPrefsWidget() {
   const keys = ["keybinding-toggle-mute"];
   const keybindingsWidget = new KeybindingsWidget(keys, this.settings);
   const keybindingsRow = new Gtk.ListBoxRow({ activatable: false });
-  keybindingsRow.set_child(keybindingsWidget);
-  listBox.append(keybindingsRow, 0);
+  if (GTK_VERSION == 3) {
+    keybindingsRow.add(keybindingsWidget);
+    listBox.add(keybindingsRow);
+    listBox.show_all();
+  } else {
+    keybindingsRow.set_child(keybindingsWidget);
+    listBox.append(keybindingsRow);
+  }
   prefsWidget.attach(listBox, 1, 1, 1, 1);
 
   // Show top bar icon label
@@ -77,6 +89,32 @@ function buildPrefsWidget() {
     "active",
     Gio.SettingsBindFlags.DEFAULT
   );
+
+  // Feedback sounds label
+  const feedbackSoundsLabel = new Gtk.Label({
+    label: "Play sound when muting and unmuting",
+    halign: Gtk.Align.START,
+    visible: true
+  });
+  prefsWidget.attach(feedbackSoundsLabel, 0, 4, 1, 1);
+
+  // Feedback sounds switch
+  const feedbackSoundsSwitch = new Gtk.Switch({
+    active: settings.get_boolean("play-feedback-sounds"),
+    halign: Gtk.Align.END,
+    visible: true,
+  });
+  this.settings.bind(
+    "play-feedback-sounds",
+    feedbackSoundsSwitch,
+    "active",
+    Gio.SettingsBindFlags.DEFAULT
+  );
+  prefsWidget.attach(feedbackSoundsSwitch, 1, 4, 1, 1);
+
+  if (GTK_VERSION == 3) {
+    prefsWidget.show_all();
+  }
 
   return prefsWidget;
 }

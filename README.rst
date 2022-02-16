@@ -10,7 +10,7 @@ tl;dr:
 * microphone icon in the top bar, only visible when recording is active
 * one-click mute/unmute using the icon
 * keyboard shortcut to mute/unmute, with push-to-talk
-* osd notifications for microphone events
+* osd and sound notifications for microphone events
 * install from https://extensions.gnome.org/extension/1113/nothing-to-say/
 
 like it? you can `buy me a coffee <https://www.buymeacoffee.com/wbolster>`_! ☕🙏
@@ -184,6 +184,8 @@ license
 
 licensed under gpl v2. see license file for details. contains code snippets originating from gnome-shell itself, which is also gpl v2.
 
+sounds from Kenney's Interface Sounds, CC0:
+https://www.kenney.nl/assets/interface-sounds
 
 anything else?
 ==============
