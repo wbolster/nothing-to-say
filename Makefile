@@ -1,7 +1,7 @@
 .PHONY: zip compile-schemas
 
 zip: compile-schemas
-	zip gnome-shell-extension-nothing-to-say-$$(jq .version metadata.json).zip \
+	zip gnome-shell-extension-nothing-to-say-$$(date +%Y%m%d%H%M%S).zip \
 		*.js \
 		metadata.json \
 		sounds/*.ogg \
