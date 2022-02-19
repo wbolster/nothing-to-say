@@ -126,6 +126,19 @@ put a clone of this repository (or a symlink) in this directory::
 note that the files must be directly in this directory, not in a
 subdirectory thereof.
 
+starting with version 14, due to the new sound notification feature,
+it is also required having the gobject introspection data for the gstreamer plugins
+base library installed in your system, to prevent:
+
+  Requiring GstAudio, version none: Typelib file for namespace 'GstAudio' (any version) not found
+
+for ubuntu::
+
+  sudo apt install gir1.2-gst-plugins-base-1.0
+
+for fedora::
+
+  sudo dnf install gstreamer1-plugins-base
 
 why?
 ====
