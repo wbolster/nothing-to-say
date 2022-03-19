@@ -112,9 +112,29 @@ function buildPrefsWidget() {
   );
   prefsWidget.attach(feedbackSoundsSwitch, 1, 4, 1, 1);
 
+  const playingSoundNotSupportedLabel = new Gtk.Label({
+    halign: Gtk.Align.START,
+    visible: !is_playing_sound_supported(),
+  });
+  playingSoundNotSupportedLabel.set_markup("<span foreground='red'>WARNING. Playing sound is not supported on this system. Is GStreamer package installed?</span>");
+  prefsWidget.attach(playingSoundNotSupportedLabel, 0, 5, 1, 1);
+
   if (GTK_VERSION == 3) {
     prefsWidget.show_all();
   }
 
   return prefsWidget;
 }
+
+function is_playing_sound_supported() {
+  try {
+    imports.gi.Gst;
+    imports.gi.GstAudio;
+    return true;
+  } catch(e) {
+    log(`${Extension.metadata.uuid}: Playing sound is not supported on this system. Is GStremer package installed?`);
+    log(`${Extension.metadata.uuid}: ${e}`);
+    return false;
+  }
+}
+

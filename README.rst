@@ -126,13 +126,15 @@ put a clone of this repository (or a symlink) in this directory::
 note that the files must be directly in this directory, not in a
 subdirectory thereof.
 
-starting with version 14, due to the new sound notification feature,
-it is also required having the gobject introspection data for the gstreamer plugins
-base library installed in your system, to prevent:
+starting with version 14, the new sound notification feature is available and enabled by default.
+it requires the gobject introspection data for the gstreamer plugins base library installed in your system.
+having no sound, check your system logs for:
+
+  Unable to import sound module. Playing sound is not available. Is GStremer package installed?
 
   Requiring GstAudio, version none: Typelib file for namespace 'GstAudio' (any version) not found
 
-for ubuntu::
+and eventually install it. for ubuntu::
 
   sudo apt install gir1.2-gst-plugins-base-1.0
 

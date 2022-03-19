@@ -4,8 +4,6 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
-const Gst = imports.gi.Gst;
-const GstAudio = imports.gi.GstAudio;
 const Gvc = imports.gi.Gvc;
 const Main = imports.ui.main;
 const Meta = imports.gi.Meta;
@@ -13,6 +11,10 @@ const PanelMenu = imports.ui.panelMenu;
 const Shell = imports.gi.Shell;
 const Signals = imports.signals;
 const St = imports.gi.St;
+
+const Gst = try_to_import_or_return_null(() => { return imports.gi.Gst; });
+const GstAudio = try_to_import_or_return_null(() => { return imports.gi.GstAudio; });
+const isPlayingSoundSupported = Gst != null && GstAudio != null;
 
 const Extension = ExtensionUtils.getCurrentExtension();
 
@@ -41,9 +43,11 @@ class Microphone {
     this.mixer_control.connect("default-source-changed", refresh_cb);
     this.mixer_control.connect("stream-added", refresh_cb);
     this.mixer_control.connect("stream-removed", refresh_cb);
-    Gst.init(null);
-    this.on_sound = init_sound("on");
-    this.off_sound = init_sound("off");
+    if (isPlayingSoundSupported) {
+      Gst.init(null);
+      this.on_sound = init_sound("on");
+      this.off_sound = init_sound("off");
+    }
     this.refresh();
   }
 
@@ -117,6 +121,16 @@ const MicrophonePanelButton = GObject.registerClass(
   }
 );
 
+function try_to_import_or_return_null(func_returning_import) {
+  try {
+    return func_returning_import();
+  } catch(e) {
+    log(`nothing-to-say: Unable to import sound module. Playing sound is not available. Is GStremer package installed?`);
+    log(`nothing-to-say: ${e}`);
+    return null;
+  }
+}
+
 function init_sound(name) {
   const playbin = Gst.ElementFactory.make("playbin", null);
   const path = Extension.dir.get_child(`sounds/${name}.ogg`).get_path();
@@ -161,7 +175,7 @@ function on_activate({ give_feedback }) {
     if (give_feedback) {
       show_osd(null, false, microphone.level);
     }
-    if (settings.get_boolean("play-feedback-sounds")) {
+    if (isPlayingSoundSupported && settings.get_boolean("play-feedback-sounds")) {
       play_sound(microphone.on_sound);
     }
   } else {
@@ -179,7 +193,7 @@ function on_activate({ give_feedback }) {
       if (give_feedback) {
         show_osd(null, true, 0);
       }
-      if (settings.get_boolean("play-feedback-sounds")) {
+      if (isPlayingSoundSupported && settings.get_boolean("play-feedback-sounds")) {
         play_sound(microphone.off_sound);
       }
     });
