@@ -15,6 +15,7 @@ function init() {}
 function buildPrefsWidget() {
   this.settings = ExtensionUtils.getSettings();
 
+  const isPlayingSoundSupported = is_playing_sound_supported();
   let gridProperties = {
     column_spacing: 12,
     row_spacing: 12,
@@ -111,12 +112,14 @@ function buildPrefsWidget() {
     Gio.SettingsBindFlags.DEFAULT
   );
   prefsWidget.attach(feedbackSoundsSwitch, 1, 4, 1, 1);
+  feedbackSoundsSwitch.set_sensitive(isPlayingSoundSupported);
 
   const playingSoundNotSupportedLabel = new Gtk.Label({
     halign: Gtk.Align.START,
-    visible: !is_playing_sound_supported(),
   });
   playingSoundNotSupportedLabel.set_markup("<span foreground='red'>WARNING. Playing sound is not supported on this system. Is GStreamer package installed?</span>");
+  playingSoundNotSupportedLabel.set_wrap(true);
+  playingSoundNotSupportedLabel.set_visible(!isPlayingSoundSupported);
   prefsWidget.attach(playingSoundNotSupportedLabel, 0, 5, 1, 1);
 
   if (GTK_VERSION == 3) {
@@ -132,7 +135,7 @@ function is_playing_sound_supported() {
     imports.gi.GstAudio;
     return true;
   } catch(e) {
-    log(`${Extension.metadata.uuid}: Playing sound is not supported on this system. Is GStremer package installed?`);
+    log(`${Extension.metadata.uuid}: Playing sound is not supported on this system. Is GStreamer package installed?`);
     log(`${Extension.metadata.uuid}: ${e}`);
     return false;
   }

@@ -130,7 +130,7 @@ starting with version 14, the new sound notification feature is available and en
 it requires the gobject introspection data for the gstreamer plugins base library installed in your system.
 having no sound, check your system logs for:
 
-  Unable to import sound module. Playing sound is not available. Is GStremer package installed?
+  Unable to import sound module. Playing sound is not available. Is GStreamer package installed?
 
   Requiring GstAudio, version none: Typelib file for namespace 'GstAudio' (any version) not found
 

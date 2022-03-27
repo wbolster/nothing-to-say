@@ -125,7 +125,7 @@ function try_to_import_or_return_null(func_returning_import) {
   try {
     return func_returning_import();
   } catch(e) {
-    log(`nothing-to-say: Unable to import sound module. Playing sound is not available. Is GStremer package installed?`);
+    log(`nothing-to-say: Unable to import sound module. Playing sound is not available. Is GStreamer package installed?`);
     log(`nothing-to-say: ${e}`);
     return null;
   }
