@@ -12,11 +12,11 @@ const Shell = imports.gi.Shell;
 const Signals = imports.signals;
 const St = imports.gi.St;
 
+const Extension = ExtensionUtils.getCurrentExtension();
+
 const Gst = try_to_import_or_return_null(() => { return imports.gi.Gst; });
 const GstAudio = try_to_import_or_return_null(() => { return imports.gi.GstAudio; });
 const isPlayingSoundSupported = Gst != null && GstAudio != null;
-
-const Extension = ExtensionUtils.getCurrentExtension();
 
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
@@ -125,8 +125,8 @@ function try_to_import_or_return_null(func_returning_import) {
   try {
     return func_returning_import();
   } catch(e) {
-    log(`nothing-to-say: Unable to import sound module. Playing sound is not available. Is GStreamer package installed?`);
-    log(`nothing-to-say: ${e}`);
+    log(`${Extension.metadata.uuid}: Unable to import sound module. Playing sound is not available. Is GStreamer package installed?`);
+    log(`${Extension.metadata.uuid}: ${e}`);
     return null;
   }
 }
