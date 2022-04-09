@@ -114,13 +114,18 @@ function buildPrefsWidget() {
   prefsWidget.attach(feedbackSoundsSwitch, 1, 4, 1, 1);
   feedbackSoundsSwitch.set_sensitive(isPlayingSoundSupported);
 
-  const playingSoundNotSupportedLabel = new Gtk.Label({
-    halign: Gtk.Align.START,
-  });
-  playingSoundNotSupportedLabel.set_markup("<span foreground='red'>WARNING. Playing sound is not supported on this system. Is GStreamer package installed?</span>");
-  playingSoundNotSupportedLabel.set_wrap(true);
-  playingSoundNotSupportedLabel.set_visible(!isPlayingSoundSupported);
-  prefsWidget.attach(playingSoundNotSupportedLabel, 0, 5, 1, 1);
+  if (!isPlayingSoundSupported) {
+    const playingSoundNotSupportedLabel = new Gtk.Label({
+      halign: Gtk.Align.START,
+    });
+    playingSoundNotSupportedLabel.set_markup("<span foreground='red'>WARNING. Playing sound is not supported on this system. Is GStreamer package installed?</span>");
+    if (GTK_VERSION == 3) {
+      playingSoundNotSupportedLabel.set_line_wrap(true);
+    } else {
+      playingSoundNotSupportedLabel.set_wrap(true);
+    }
+    prefsWidget.attach(playingSoundNotSupportedLabel, 0, 5, 1, 1);
+  }
 
   if (GTK_VERSION == 3) {
     prefsWidget.show_all();
