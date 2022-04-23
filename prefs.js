@@ -127,6 +127,26 @@ function buildPrefsWidget() {
     prefsWidget.attach(playingSoundNotSupportedLabel, 0, 5, 1, 1);
   }
 
+  const controlAllInputsLabel = new Gtk.Label({
+    label: "Mute and unmute all microphones",
+    halign: Gtk.Align.START,
+    visible: true,
+  });
+  prefsWidget.attach(controlAllInputsLabel, 0, 6, 1, 1);
+
+  const controlAllInputsSwitch = new Gtk.Switch({
+    active: this.settings.get_boolean("control-all-inputs"),
+    halign: Gtk.Align.END,
+    visible: true,
+  });
+  this.settings.bind(
+    "control-all-inputs",
+    controlAllInputsSwitch,
+    "active",
+    Gio.SettingsBindFlags.DEFAULT
+  );
+  prefsWidget.attach(controlAllInputsSwitch, 1, 6, 1, 1);
+
   if (GTK_VERSION == 3) {
     prefsWidget.show_all();
   }
