@@ -84,8 +84,15 @@ class Microphone extends Signals.EventEmitter {
   }
 
   set muted(muted) {
-    if (!this.stream) return;
-    this.stream.change_is_muted(muted);
+    const controllAllInputs = settings.get_boolean("control-all-inputs");
+    if (controllAllInputs) {
+      const sources = this.mixer_control.get_sources();
+      for(let source of sources) {
+        source.change_is_muted(muted);
+      }
+    } else if (this.stream) {
+      this.stream.change_is_muted(muted);
+    }
   }
 
   get level() {

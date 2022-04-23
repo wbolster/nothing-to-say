@@ -142,5 +142,17 @@ export default class extends ExtensionPreferences {
       Gio.SettingsBindFlags.DEFAULT,
     );
     group.add(feedbackSoundsSwitch);
+
+    // control all inputs row
+    const controlAllInputsSwitch = new Adw.SwitchRow({
+      title: "Mute and unmute all microphones",
+    });
+    settings.bind(
+      "control-all-inputs",
+      controlAllInputsSwitch,
+      "active",
+      Gio.SettingsBindFlags.DEFAULT,
+    );
+    group.add(controlAllInputsSwitch);
   }
 }
