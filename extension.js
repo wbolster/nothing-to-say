@@ -98,7 +98,7 @@ class Microphone {
   get level() {
     if (!this.stream) return 0;
     return (
-      (100 * this.stream.get_volume()) / this.mixer_control.get_vol_max_norm()
+      (this.stream.get_volume()) / this.mixer_control.get_vol_max_norm()
     );
   }
 }
