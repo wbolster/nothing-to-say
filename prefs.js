@@ -2,115 +2,129 @@
 
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
+import GObject from 'gi://GObject';
+import Adw from 'gi://Adw';
 import Gst from 'gi://Gst';
 import GstAudio from 'gi://GstAudio';
 
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
-import {KeybindingsWidget} from './keybindingsWidget.js';
+
+const KeyValuePair = GObject.registerClass({
+    Properties: {
+      key: GObject.ParamSpec.string(
+        "key", null, null,
+        GObject.ParamFlags.READWRITE,
+        "",
+      ),
+      value: GObject.ParamSpec.string(
+        "value", "Value", "Value",
+        GObject.ParamFlags.READWRITE,
+        "",
+      ),
+    },
+  }, class KeyValuePair extends GObject.Object {},
+);
+
 
 export default class extends ExtensionPreferences {
-  getPreferencesWidget() {
-    this.settings = this.getSettings();
+  fillPreferencesWindow(window) {
+    const settings = this.getSettings()
 
+    const page = new Adw.PreferencesPage({
+      icon_name: 'dialog-information-symbolic',
+    });
+    window.add(page);
+
+    let group = new Adw.PreferencesGroup({
+      title: "Keybindings",
+      description: "Keybindings for muting and unmuting",
+    });
+    page.add(group);
+
+    // keybinding row
+    group.add((() => {
+      const accel = settings.get_strv("keybinding-toggle-mute")[0] || "<Alt>backslash"
+      const keybindingsRow = new Adw.EntryRow({
+        title: "Mute/Unmute",
+        show_apply_button: true,
+        text: accel,
+      })
+      const resetButton = new Gtk.Button({
+        icon_name: "edit-clear-symbolic",
+        tooltip_text: "Reset to default",
+        valign: Gtk.Align.CENTER,
+      })
+      resetButton.connect("clicked", () => {
+        settings.reset("keybinding-toggle-mute");
+        keybindingsRow.text = settings.get_strv("keybinding-toggle-mute")[0] || "<Alt>backslash"
+      });
+      keybindingsRow.add_suffix(resetButton)
+      keybindingsRow.connect("apply", () => {
+        settings.set_strv("keybinding-toggle-mute", [keybindingsRow.text]);
+      })
+      return keybindingsRow;
+    })());
+
+    group = new Adw.PreferencesGroup({
+      title: "Other",
+    });
+    page.add(group);
+
+    // top bar icon row
+    group.add((() => {
+      const model = new Gio.ListStore({item_type: KeyValuePair});
+      model.splice(0, 0, [
+        new KeyValuePair({key: "when-recording", value: "When recording"}),
+        new KeyValuePair({key: "always", value: "Always"}),
+        new KeyValuePair({key: "never", value: "Never"}),
+      ]);
+      const iconVisibleComboBox = new Adw.ComboRow({
+        title: "Top bar icon",
+        subtitle: "Whether to show top bar icon",
+        model: model,
+        expression: new Gtk.PropertyExpression(KeyValuePair, null, "value"),
+      })
+      for (let i = 0; i < model.n_items; i++) {
+        if (model.get_item(i).key === settings.get_string("icon-visibility", "when-recording")) {
+          iconVisibleComboBox.selected = i;
+          break;
+        }
+      }
+      iconVisibleComboBox.connect("notify::selected-item", () => {
+        const selected_item = iconVisibleComboBox.selected_item;
+        if (selected_item) {
+          settings.set_string("icon-visibility", selected_item.key);
+        }
+      });
+      settings.bind("icon-visibility", iconVisibleComboBox, "active-id", Gio.SettingsBindFlags.DEFAULT);
+      return iconVisibleComboBox;
+    })());
+
+    // osd row
+    const toggleOSD = new Adw.SwitchRow({
+      title: "OSD notification",
+      subtitle: "Whether to show OSD notification",
+    })
+    settings.bind("show-osd", toggleOSD, "active", Gio.SettingsBindFlags.DEFAULT);
+    group.add(toggleOSD);
+
+    // sound notification row
+    const feedbackSoundsSwitch = new Adw.SwitchRow({
+      title: "Sound notification",
+      subtitle: "Play sound when muting and unmuting",
+    })
+    settings.bind("play-feedback-sounds", feedbackSoundsSwitch, "active", Gio.SettingsBindFlags.DEFAULT);
+    group.add(feedbackSoundsSwitch);
+
+    // no sound alert row
     const isPlayingSoundSupported = Gst != null && GstAudio != null;
-    let gridProperties = {
-      column_spacing: 12,
-      row_spacing: 12,
-      visible: true,
-    };
-    const prefsWidget = new Gtk.Grid(gridProperties);
-
-    // Keybindings label
-    const keybindingsLabel = new Gtk.Label({
-      label: "Keybindings",
-      halign: Gtk.Align.START,
-      visible: true,
-    });
-    prefsWidget.attach(keybindingsLabel, 0, 1, 1, 1);
-
-    // Keybindings widget
-    const listBox = new Gtk.ListBox({selection_mode: 0, hexpand: true});
-    const keys = ["keybinding-toggle-mute"];
-    const keybindingsWidget = new KeybindingsWidget(keys, this.settings);
-    const keybindingsRow = new Gtk.ListBoxRow({activatable: false});
-    keybindingsRow.set_child(keybindingsWidget);
-    listBox.append(keybindingsRow);
-    prefsWidget.attach(listBox, 1, 1, 1, 1);
-
-    // Show top bar icon label
-    const iconVisibleLabel = new Gtk.Label({
-      label: "Show top bar icon",
-      halign: Gtk.Align.START,
-      visible: true,
-    });
-    prefsWidget.attach(iconVisibleLabel, 0, 2, 1, 1);
-
-    // Show top bar icon combo box
-    const iconVisibleComboBox = new Gtk.ComboBoxText();
-    iconVisibleComboBox.append("when-recording", "When recording");
-    iconVisibleComboBox.append("always", "Always");
-    iconVisibleComboBox.append("never", "Never");
-    this.settings.bind(
-      "icon-visibility",
-      iconVisibleComboBox,
-      "active-id",
-      Gio.SettingsBindFlags.DEFAULT
-    );
-    prefsWidget.attach(iconVisibleComboBox, 1, 2, 1, 1);
-
-    const showOSDLabel = new Gtk.Label({
-      label: "Whether to show OSD notification",
-      halign: Gtk.Align.START,
-      visible: true,
-    });
-    prefsWidget.attach(showOSDLabel, 0, 3, 1, 1);
-
-    let toggleOSD = new Gtk.Switch({
-      active: this.settings.get_boolean("show-osd"),
-      halign: Gtk.Align.END,
-      visible: true,
-    });
-    prefsWidget.attach(toggleOSD, 1, 3, 1, 1);
-
-    this.settings.bind(
-      "show-osd",
-      toggleOSD,
-      "active",
-      Gio.SettingsBindFlags.DEFAULT
-    );
-
-    // Feedback sounds label
-    const feedbackSoundsLabel = new Gtk.Label({
-      label: "Play sound when muting and unmuting",
-      halign: Gtk.Align.START,
-      visible: true
-    });
-    prefsWidget.attach(feedbackSoundsLabel, 0, 4, 1, 1);
-
-    // Feedback sounds switch
-    const feedbackSoundsSwitch = new Gtk.Switch({
-      active: this.settings.get_boolean("play-feedback-sounds"),
-      halign: Gtk.Align.END,
-      visible: true,
-    });
-    this.settings.bind(
-      "play-feedback-sounds",
-      feedbackSoundsSwitch,
-      "active",
-      Gio.SettingsBindFlags.DEFAULT
-    );
-    prefsWidget.attach(feedbackSoundsSwitch, 1, 4, 1, 1);
-    feedbackSoundsSwitch.set_sensitive(isPlayingSoundSupported);
-
     if (!isPlayingSoundSupported) {
       const playingSoundNotSupportedLabel = new Gtk.Label({
         halign: Gtk.Align.START,
       });
       playingSoundNotSupportedLabel.set_markup("<span foreground='red'>WARNING. Playing sound is not supported on this system. Is GStreamer package installed?</span>");
       playingSoundNotSupportedLabel.set_wrap(true);
-      prefsWidget.attach(playingSoundNotSupportedLabel, 0, 5, 1, 1);
+      group.add(playingSoundNotSupportedLabel);
     }
-
-    return prefsWidget;
   }
 }
