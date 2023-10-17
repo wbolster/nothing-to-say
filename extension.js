@@ -1,21 +1,21 @@
 "use strict";
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const GObject = imports.gi.GObject;
-const Gvc = imports.gi.Gvc;
-const Main = imports.ui.main;
-const Meta = imports.gi.Meta;
-const PanelMenu = imports.ui.panelMenu;
-const Shell = imports.gi.Shell;
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+import St from 'gi://St';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import Gvc from 'gi://Gvc';
+import GObject from 'gi://GObject';
+import Gst from 'gi://Gst';
+import GstAudio from 'gi://GstAudio';
+
+import * as Main from 'resource:///org/gnome/shell/ui/main.js'
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js'
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+
 const Signals = imports.signals;
-const St = imports.gi.St;
 
-const Extension = ExtensionUtils.getCurrentExtension();
-
-const Gst = try_to_import_or_return_null(() => { return imports.gi.Gst; });
-const GstAudio = try_to_import_or_return_null(() => { return imports.gi.GstAudio; });
 const isPlayingSoundSupported = Gst != null && GstAudio != null;
 
 const EXCLUDED_APPLICATION_IDS = [
@@ -31,7 +31,7 @@ let microphone;
 let panel_button;
 
 class Microphone {
-  constructor() {
+  constructor(dir) {
     this.active = null;
     this.stream = null;
     this.muted_changed_id = 0;
@@ -45,8 +45,8 @@ class Microphone {
     this.mixer_control.connect("stream-removed", refresh_cb);
     if (isPlayingSoundSupported) {
       Gst.init(null);
-      this.on_sound = init_sound("on");
-      this.off_sound = init_sound("off");
+      this.on_sound = init_sound(dir, "on");
+      this.off_sound = init_sound(dir, "off");
     }
     this.refresh();
   }
@@ -107,8 +107,8 @@ Signals.addSignalMethods(Microphone.prototype);
 const MicrophonePanelButton = GObject.registerClass(
   { GTypeName: "MicrophonePanelButton" },
   class extends PanelMenu.Button {
-    _init() {
-      super._init(0.0, `${Extension.metadata.name} panel indicator`, false);
+    _init(metadata) {
+      super._init(0.0, `${metadata.name} panel indicator`, false);
       this.icon = new St.Icon({
         icon_name: get_icon_name(false),
         style_class: "system-status-icon",
@@ -121,19 +121,9 @@ const MicrophonePanelButton = GObject.registerClass(
   }
 );
 
-function try_to_import_or_return_null(func_returning_import) {
-  try {
-    return func_returning_import();
-  } catch(e) {
-    log(`${Extension.metadata.uuid}: Unable to import sound module. Playing sound is not available. Is GStreamer package installed?`);
-    log(`${Extension.metadata.uuid}: ${e}`);
-    return null;
-  }
-}
-
-function init_sound(name) {
+function init_sound(dir, name) {
   const playbin = Gst.ElementFactory.make("playbin", null);
-  const path = Extension.dir.get_child(`sounds/${name}.ogg`).get_path();
+  const path = dir.get_child(`sounds/${name}.ogg`).get_path();
   const uri = Gst.filename_to_uri(path);
   playbin.set_property("uri", uri);
   const sink = Gst.ElementFactory.make("pulsesink", "sink");
@@ -206,56 +196,56 @@ function play_sound(sound) {
   sound.set_state(Gst.State.PLAYING);
 }
 
-function init() {}
-
-function enable() {
-  settings = ExtensionUtils.getSettings();
-  microphone = new Microphone();
-  panel_button = new MicrophonePanelButton();
-  panel_button.visible = icon_should_be_visible(microphone.active);
-  const indicatorName = `${Extension.metadata.name} indicator`;
-  Main.panel.addToStatusArea(indicatorName, panel_button, 0, "right");
-  microphone.connect("notify::active", () => {
-    if (microphone.active) {
-      panel_button.icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
-    } else {
-      panel_button.icon.remove_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
-    }
+export default class extends Extension {
+  enable() {
+    settings = this.getSettings();
+    microphone = new Microphone(this.dir);
+    panel_button = new MicrophonePanelButton(this.metadata);
     panel_button.visible = icon_should_be_visible(microphone.active);
-    if (settings.get_boolean("show-osd") && (initialised || microphone.active))
-      show_osd(
-        microphone.active ? "Microphone activated" : "Microphone deactivated",
-        microphone.muted
-      );
-    initialised = true;
-  });
-  microphone.connect("notify::muted", () => {
-    panel_button.icon.icon_name = get_icon_name(microphone.muted);
-  });
-  Main.wm.addKeybinding(
-    KEYBINDING_KEY_NAME,
-    settings,
-    Meta.KeyBindingFlags.NONE,
-    Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
-    () => {
-      on_activate({ give_feedback: settings.get_boolean("show-osd") });
-    }
-  );
-  settings.connect("changed::icon-visibility", () => {
-    panel_button.visible = icon_should_be_visible(microphone.active);
-  });
-}
+    const indicatorName = `${this.metadata.name} indicator`;
+    Main.panel.addToStatusArea(indicatorName, panel_button, 0, "right");
+    microphone.connect("notify::active", () => {
+      if (microphone.active) {
+        panel_button.icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
+      } else {
+        panel_button.icon.remove_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
+      }
+      panel_button.visible = icon_should_be_visible(microphone.active);
+      if (settings.get_boolean("show-osd") && (initialised || microphone.active))
+        show_osd(
+            microphone.active ? "Microphone activated" : "Microphone deactivated",
+            microphone.muted
+        );
+      initialised = true;
+    });
+    microphone.connect("notify::muted", () => {
+      panel_button.icon.icon_name = get_icon_name(microphone.muted);
+    });
+    Main.wm.addKeybinding(
+        KEYBINDING_KEY_NAME,
+        settings,
+        Meta.KeyBindingFlags.NONE,
+        Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+        () => {
+          on_activate({give_feedback: settings.get_boolean("show-osd")});
+        }
+    );
+    settings.connect("changed::icon-visibility", () => {
+      panel_button.visible = icon_should_be_visible(microphone.active);
+    });
+  }
 
-function disable() {
-  Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
-  Main.panel._rightBox.remove_child(panel_button);
-  settings = null;
-  microphone.destroy();
-  microphone = null;
-  panel_button.destroy();
-  panel_button = null;
-  if (mute_timeout_id) {
-    GLib.Source.remove(mute_timeout_id);
-    mute_timeout_id = null;
+  disable() {
+    Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
+    Main.panel._rightBox.remove_child(panel_button);
+    settings = null;
+    microphone.destroy();
+    microphone = null;
+    panel_button.destroy();
+    panel_button = null;
+    if (mute_timeout_id) {
+      GLib.Source.remove(mute_timeout_id);
+      mute_timeout_id = null;
+    }
   }
 }

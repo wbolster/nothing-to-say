@@ -1,12 +1,10 @@
 "use strict";
 
-const GLib = imports.gi.GLib;
-const GObject = imports.gi.GObject;
-const Gtk = imports.gi.Gtk;
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk';
 
-const GTK_VERSION = Gtk.get_major_version();
-
-var KeybindingsWidget = new GObject.Class({
+export const KeybindingsWidget = new GObject.Class({
   Name: `KeybindingsWidget`,
   Extends: Gtk.Box,
 
@@ -87,11 +85,7 @@ var KeybindingsWidget = new GObject.Class({
     this._tree_view.columns_autosize();
     this._tree_view.set_headers_visible(false);
 
-    if (GTK_VERSION == 3) {
-      this.add(this._tree_view);
-    } else {
-      this.append(this._tree_view);
-    }
+    this.append(this._tree_view);
     this.keybinding_column = keybinding_column;
 
     this._settings.connect("changed", this._onSettingsChanged.bind(this));
