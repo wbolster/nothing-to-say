@@ -1,18 +1,18 @@
 "use strict";
 
-import GLib from 'gi://GLib';
-import Gio from 'gi://Gio';
-import St from 'gi://St';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
-import Gvc from 'gi://Gvc';
-import GObject from 'gi://GObject';
-import Gst from 'gi://Gst';
-import GstAudio from 'gi://GstAudio';
+import GLib from "gi://GLib";
+import Gio from "gi://Gio";
+import St from "gi://St";
+import Meta from "gi://Meta";
+import Shell from "gi://Shell";
+import Gvc from "gi://Gvc";
+import GObject from "gi://GObject";
+import Gst from "gi://Gst";
+import GstAudio from "gi://GstAudio";
 
-import * as Main from 'resource:///org/gnome/shell/ui/main.js'
-import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js'
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Main from "resource:///org/gnome/shell/ui/main.js";
+import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
+import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
 const Signals = imports.signals;
 
@@ -97,9 +97,7 @@ class Microphone {
 
   get level() {
     if (!this.stream) return 0;
-    return (
-      (this.stream.get_volume()) / this.mixer_control.get_vol_max_norm()
-    );
+    return this.stream.get_volume() / this.mixer_control.get_vol_max_norm();
   }
 }
 Signals.addSignalMethods(Microphone.prototype);
@@ -118,7 +116,7 @@ const MicrophonePanelButton = GObject.registerClass(
         on_activate({ give_feedback: false });
       });
     }
-  }
+  },
 );
 
 function init_sound(dir, name) {
@@ -165,7 +163,10 @@ function on_activate({ give_feedback }) {
     if (give_feedback) {
       show_osd(null, false, microphone.level);
     }
-    if (isPlayingSoundSupported && settings.get_boolean("play-feedback-sounds")) {
+    if (
+      isPlayingSoundSupported &&
+      settings.get_boolean("play-feedback-sounds")
+    ) {
       play_sound(microphone.on_sound);
     }
   } else {
@@ -183,7 +184,10 @@ function on_activate({ give_feedback }) {
       if (give_feedback) {
         show_osd(null, true, 0);
       }
-      if (isPlayingSoundSupported && settings.get_boolean("play-feedback-sounds")) {
+      if (
+        isPlayingSoundSupported &&
+        settings.get_boolean("play-feedback-sounds")
+      ) {
         play_sound(microphone.off_sound);
       }
     });
@@ -208,13 +212,18 @@ export default class extends Extension {
       if (microphone.active) {
         panel_button.icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
       } else {
-        panel_button.icon.remove_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
+        panel_button.icon.remove_style_class_name(
+          MICROPHONE_ACTIVE_STYLE_CLASS,
+        );
       }
       panel_button.visible = icon_should_be_visible(microphone.active);
-      if (settings.get_boolean("show-osd") && (initialised || microphone.active))
+      if (
+        settings.get_boolean("show-osd") &&
+        (initialised || microphone.active)
+      )
         show_osd(
-            microphone.active ? "Microphone activated" : "Microphone deactivated",
-            microphone.muted
+          microphone.active ? "Microphone activated" : "Microphone deactivated",
+          microphone.muted,
         );
       initialised = true;
     });
@@ -222,13 +231,13 @@ export default class extends Extension {
       panel_button.icon.icon_name = get_icon_name(microphone.muted);
     });
     Main.wm.addKeybinding(
-        KEYBINDING_KEY_NAME,
-        settings,
-        Meta.KeyBindingFlags.NONE,
-        Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
-        () => {
-          on_activate({give_feedback: settings.get_boolean("show-osd")});
-        }
+      KEYBINDING_KEY_NAME,
+      settings,
+      Meta.KeyBindingFlags.NONE,
+      Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+      () => {
+        on_activate({ give_feedback: settings.get_boolean("show-osd") });
+      },
     );
     settings.connect("changed::icon-visibility", () => {
       panel_button.visible = icon_should_be_visible(microphone.active);
