@@ -152,7 +152,7 @@ the attendees?
 
 think for a bit. oh yes. you have heard ringing phones, crying babies,
 coughs, sneezes, or, if you have been particularly unlucky, even less
-appetising sounds. at some point people get annoyed. someone will
+appetizing sounds. at some point people get annoyed. someone will
 speak up to ask others to please be quiet. the original conversation
 got interrupted. the attendees got distracted. what were we talking
 about again? what was this meeting supposed to be about in the first
