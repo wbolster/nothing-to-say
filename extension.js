@@ -14,7 +14,7 @@ import * as Main from "resource:///org/gnome/shell/ui/main.js";
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
-const Signals = imports.signals;
+import * as Signals from "resource:///org/gnome/shell/misc/signals.js";
 
 const isPlayingSoundSupported = Gst != null && GstAudio != null;
 
@@ -30,8 +30,9 @@ let settings = null;
 let microphone;
 let panel_button;
 
-class Microphone {
+class Microphone extends Signals.EventEmitter {
   constructor(dir) {
+    super();
     this.active = null;
     this.stream = null;
     this.muted_changed_id = 0;
@@ -100,7 +101,6 @@ class Microphone {
     return this.stream.get_volume() / this.mixer_control.get_vol_max_norm();
   }
 }
-Signals.addSignalMethods(Microphone.prototype);
 
 const MicrophonePanelButton = GObject.registerClass(
   { GTypeName: "MicrophonePanelButton" },
