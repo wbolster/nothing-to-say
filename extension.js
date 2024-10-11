@@ -127,6 +127,15 @@ function init_sound(dir, name) {
   const sink = Gst.ElementFactory.make("pulsesink", "sink");
   playbin.set_property("audio-sink", sink);
   playbin.set_volume(GstAudio.StreamVolumeFormat.LINEAR, 0.5);
+
+  // Fix audio node suspend-on-idle; stop playback at end-of-stream
+  const bus = playbin.get_bus();
+  bus.add_signal_watch();
+  bus.connect('message', (_bus, msg) => {
+    if (msg.type === Gst.MessageType.EOS)
+      playbin.set_state(Gst.State.NULL);
+  });
+
   return playbin;
 }
 
