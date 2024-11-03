@@ -7,16 +7,12 @@ import Meta from "gi://Meta";
 import Shell from "gi://Shell";
 import Gvc from "gi://Gvc";
 import GObject from "gi://GObject";
-import Gst from "gi://Gst";
-import GstAudio from "gi://GstAudio";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
 import * as Signals from "resource:///org/gnome/shell/misc/signals.js";
-
-const isPlayingSoundSupported = Gst != null && GstAudio != null;
 
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
@@ -28,10 +24,11 @@ const MICROPHONE_ACTIVE_STYLE_CLASS = "screencast-indicator";
 let initialised = false; // flag to avoid notifications on startup
 let settings = null;
 let microphone;
+let audio_player;
 let panel_button;
 
 class Microphone extends Signals.EventEmitter {
-  constructor(dir) {
+  constructor() {
     super();
     this.active = null;
     this.stream = null;
@@ -44,11 +41,6 @@ class Microphone extends Signals.EventEmitter {
     this.mixer_control.connect("default-source-changed", refresh_cb);
     this.mixer_control.connect("stream-added", refresh_cb);
     this.mixer_control.connect("stream-removed", refresh_cb);
-    if (isPlayingSoundSupported) {
-      Gst.init(null);
-      this.on_sound = init_sound(dir, "on");
-      this.off_sound = init_sound(dir, "off");
-    }
     this.refresh();
   }
 
@@ -102,6 +94,29 @@ class Microphone extends Signals.EventEmitter {
   }
 }
 
+class AudioPlayer {
+  #sound_on;
+  #sound_off;
+
+  constructor(dir) {
+    this.#sound_on = dir.get_child("sounds/on.ogg");
+    this.#sound_off = dir.get_child("sounds/off.ogg");
+  }
+
+  #play_sound(sound_file) {
+    let player = global.display.get_sound_player();
+    player.play_from_file(sound_file, "Toggle mute", null);
+  }
+
+  play_on() {
+    this.#play_sound(this.#sound_on);
+  }
+
+  play_off() {
+    this.#play_sound(this.#sound_off);
+  }
+}
+
 const MicrophonePanelButton = GObject.registerClass(
   { GTypeName: "MicrophonePanelButton" },
   class extends PanelMenu.Button {
@@ -118,26 +133,6 @@ const MicrophonePanelButton = GObject.registerClass(
     }
   },
 );
-
-function init_sound(dir, name) {
-  const playbin = Gst.ElementFactory.make("playbin", null);
-  const path = dir.get_child(`sounds/${name}.ogg`).get_path();
-  const uri = Gst.filename_to_uri(path);
-  playbin.set_property("uri", uri);
-  const sink = Gst.ElementFactory.make("pulsesink", "sink");
-  playbin.set_property("audio-sink", sink);
-  playbin.set_volume(GstAudio.StreamVolumeFormat.LINEAR, 0.5);
-
-  // Fix audio node suspend-on-idle; stop playback at end-of-stream
-  const bus = playbin.get_bus();
-  bus.add_signal_watch();
-  bus.connect('message', (_bus, msg) => {
-    if (msg.type === Gst.MessageType.EOS)
-      playbin.set_state(Gst.State.NULL);
-  });
-
-  return playbin;
-}
 
 function get_icon_name(muted) {
   // TODO: use -low and -medium icons based on .level
@@ -185,25 +180,21 @@ function toggle_mute(mute, give_feedback) {
     if (give_feedback) {
       show_osd(null, mute, mute ? 0 : microphone.level);
     }
-    if (
-      isPlayingSoundSupported &&
-      settings.get_boolean("play-feedback-sounds")
-    ) {
-      play_sound(mute ? microphone.off_sound : microphone.on_sound);
+    if (settings.get_boolean("play-feedback-sounds")) {
+      if (mute) {
+        audio_player.play_off();
+      } else {
+        audio_player.play_on();
+      }
     }
   });
-}
-
-function play_sound(sound) {
-  // Rewind in case the sound has played already.
-  sound.set_state(Gst.State.NULL);
-  sound.set_state(Gst.State.PLAYING);
 }
 
 export default class extends Extension {
   enable() {
     settings = this.getSettings();
-    microphone = new Microphone(this.dir);
+    microphone = new Microphone();
+    audio_player = new AudioPlayer(this.dir);
     panel_button = new MicrophonePanelButton(this.metadata);
     panel_button.visible = icon_should_be_visible(microphone.active);
     const indicatorName = `${this.metadata.name} indicator`;
