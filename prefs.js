@@ -4,8 +4,6 @@ import Gio from "gi://Gio";
 import Gtk from "gi://Gtk";
 import GObject from "gi://GObject";
 import Adw from "gi://Adw";
-import Gst from "gi://Gst";
-import GstAudio from "gi://GstAudio";
 
 import { ExtensionPreferences } from "resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js";
 
@@ -144,18 +142,5 @@ export default class extends ExtensionPreferences {
       Gio.SettingsBindFlags.DEFAULT,
     );
     group.add(feedbackSoundsSwitch);
-
-    // no sound alert row
-    const isPlayingSoundSupported = Gst != null && GstAudio != null;
-    if (!isPlayingSoundSupported) {
-      const playingSoundNotSupportedLabel = new Gtk.Label({
-        halign: Gtk.Align.START,
-      });
-      playingSoundNotSupportedLabel.set_markup(
-        "<span foreground='red'>WARNING. Playing sound is not supported on this system. Is GStreamer package installed?</span>",
-      );
-      playingSoundNotSupportedLabel.set_wrap(true);
-      group.add(playingSoundNotSupportedLabel);
-    }
   }
 }
