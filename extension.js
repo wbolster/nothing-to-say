@@ -105,15 +105,20 @@ class Microphone extends Signals.EventEmitter {
 const MicrophonePanelButton = GObject.registerClass(
   { GTypeName: "MicrophonePanelButton" },
   class extends PanelMenu.Button {
-    _init(metadata) {
-      super._init(0.0, `${metadata.name} panel indicator`, false);
+    _init(extension) {
+      super._init(0.0, `${extension.metadata.name} panel indicator`, false);
       this.icon = new St.Icon({
         icon_name: get_icon_name(false),
         style_class: "system-status-icon",
       });
       this.add_child(this.icon);
-      this.connect("button-press-event", () => {
-        on_activate({ give_feedback: false });
+      this.connect("button-press-event", (_, event) => {
+        if (event.get_button() === 3) {
+          // Right click.
+          extension.openPreferences();
+        } else {
+          on_activate({ give_feedback: false });
+        }
       });
     }
   },
@@ -213,7 +218,7 @@ export default class extends Extension {
   enable() {
     settings = this.getSettings();
     microphone = new Microphone(this.dir);
-    panel_button = new MicrophonePanelButton(this.metadata);
+    panel_button = new MicrophonePanelButton(this);
     panel_button.visible = icon_should_be_visible(microphone.active);
     const indicatorName = `${this.metadata.name} indicator`;
     Main.panel.addToStatusArea(indicatorName, panel_button, 0, "right");
