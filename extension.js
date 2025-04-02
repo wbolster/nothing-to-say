@@ -164,43 +164,34 @@ function show_osd(text, muted, level) {
   Main.osdWindowManager.show(monitor, icon, text, level);
 }
 
-let mute_timeout_id = null;
-
 function on_activate({ give_feedback }) {
-  if (microphone.muted) {
-    microphone.muted = false;
+  toggle_mute(!microphone.muted, give_feedback);
+}
+
+let toggle_mute_timeout_id = null;
+
+function toggle_mute(mute, give_feedback) {
+  // use a delay before toggling; this makes push-to-talk/mute work
+  if (toggle_mute_timeout_id) {
+    GLib.Source.remove(toggle_mute_timeout_id);
     if (give_feedback) {
-      show_osd(null, false, microphone.level);
+      // keep osd visible
+      show_osd(null, !mute, mute ? microphone.level : 0);
+    }
+  }
+  toggle_mute_timeout_id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
+    toggle_mute_timeout_id = null;
+    microphone.muted = mute;
+    if (give_feedback) {
+      show_osd(null, mute, mute ? 0 : microphone.level);
     }
     if (
       isPlayingSoundSupported &&
       settings.get_boolean("play-feedback-sounds")
     ) {
-      play_sound(microphone.on_sound);
+      play_sound(mute ? microphone.off_sound : microphone.on_sound);
     }
-  } else {
-    // use a delay before muting; this makes push-to-talk work
-    if (mute_timeout_id) {
-      GLib.Source.remove(mute_timeout_id);
-      if (give_feedback) {
-        // keep osd visible
-        show_osd(null, false, microphone.level);
-      }
-    }
-    mute_timeout_id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
-      mute_timeout_id = null;
-      microphone.muted = true;
-      if (give_feedback) {
-        show_osd(null, true, 0);
-      }
-      if (
-        isPlayingSoundSupported &&
-        settings.get_boolean("play-feedback-sounds")
-      ) {
-        play_sound(microphone.off_sound);
-      }
-    });
-  }
+  });
 }
 
 function play_sound(sound) {
@@ -261,9 +252,9 @@ export default class extends Extension {
     microphone = null;
     panel_button.destroy();
     panel_button = null;
-    if (mute_timeout_id) {
-      GLib.Source.remove(mute_timeout_id);
-      mute_timeout_id = null;
+    if (toggle_mute_timeout_id) {
+      GLib.Source.remove(toggle_mute_timeout_id);
+      toggle_mute_timeout_id = null;
     }
   }
 }
