@@ -199,6 +199,7 @@ export default class extends Extension {
   enable() {
     settings = this.getSettings();
     microphone = new Microphone(this.dir);
+    audio_player = new AudioPlayer(this.dir);
     panel_button = new MicrophonePanelButton(this);
     panel_button.visible = icon_should_be_visible(microphone.active);
     const indicatorName = `${this.metadata.name} indicator`;
