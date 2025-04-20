@@ -198,7 +198,7 @@ function toggle_mute(mute, give_feedback) {
 export default class extends Extension {
   enable() {
     settings = this.getSettings();
-    microphone = new Microphone(this.dir);
+    microphone = new Microphone();
     audio_player = new AudioPlayer(this.dir);
     panel_button = new MicrophonePanelButton(this);
     panel_button.visible = icon_should_be_visible(microphone.active);
