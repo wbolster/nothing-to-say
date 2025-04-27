@@ -68,6 +68,11 @@ class Microphone extends Signals.EventEmitter {
     if (this.active != was_active) {
       this.emit("notify::active");
     }
+
+    // Set muted state for all sources if global control is used.
+    if (settings.get_boolean("control-global-muted")) {
+      this.muted = settings.get_boolean("global-muted");
+    }
   }
 
   destroy() {
@@ -84,8 +89,15 @@ class Microphone extends Signals.EventEmitter {
   }
 
   set muted(muted) {
-    if (!this.stream) return;
-    this.stream.change_is_muted(muted);
+    if (settings.get_boolean("control-global-muted")) {
+      let sources = this.mixer_control.get_sources();
+      for(let source of sources) {
+        source.change_is_muted(muted);
+      }
+      settings.set_boolean("global-muted", muted);
+    } else if (this.stream) {
+      this.stream.change_is_muted(muted);
+    }
   }
 
   get level() {
@@ -237,6 +249,9 @@ export default class extends Extension {
     );
     settings.connect("changed::icon-visibility", () => {
       panel_button.visible = icon_should_be_visible(microphone.active);
+    });
+    settings.connect("changed::control-global-muted", () => {
+      microphone.muted = settings.get_boolean("global-muted");
     });
   }
 
