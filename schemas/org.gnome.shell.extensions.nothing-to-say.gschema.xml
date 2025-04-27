@@ -26,10 +26,15 @@
       <summary>Play sound when muting and unmuting</summary>
       <description>Play sounds when the microphone is muted and unmuted.</description>
     </key>
-    <key name="control-all-inputs" type="b">
+    <key name="control-global-muted" type="b">
+      <default>true</default>
+      <summary>Control all microphones</summary>
+      <description>All inputs are muted and unmuted if true. Otherwise only the default input is.</description>
+    </key>
+    <key name="global-muted" type="b">
       <default>false</default>
-      <summary>Mute and unmute all microphones</summary>
-      <description>All inputs are muted and unmuted if true. Otherwise only the default input is</description>
+      <summary>Muted state if control-global-muted is true</summary>
+      <description>Stores the global muted state between sessions.</description>
     </key>
   </schema>
 </schemalist>

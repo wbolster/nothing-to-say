@@ -143,16 +143,17 @@ export default class extends ExtensionPreferences {
     );
     group.add(feedbackSoundsSwitch);
 
-    // control all inputs row
-    const controlAllInputsSwitch = new Adw.SwitchRow({
-      title: "Mute and unmute all microphones",
+    // control global muted row
+    const controlGlobalMutedSwitch = new Adw.SwitchRow({
+      title: "Control all microphones",
+      subtitle: "Mute and unmute all microphones. If off only the microphone in use will be muted and unmuted."
     });
     settings.bind(
-      "control-all-inputs",
-      controlAllInputsSwitch,
+      "control-global-muted",
+      controlGlobalMutedSwitch,
       "active",
       Gio.SettingsBindFlags.DEFAULT,
     );
-    group.add(controlAllInputsSwitch);
+    group.add(controlGlobalMutedSwitch);
   }
 }
