@@ -159,9 +159,8 @@ function icon_should_be_visible(microphone_active) {
 }
 
 function show_osd(text, muted, level) {
-  const monitor = -1;
   const icon = Gio.Icon.new_for_string(get_icon_name(muted));
-  Main.osdWindowManager.show(monitor, icon, text, level);
+  Main.osdWindowManager.showAll(icon, text, level);
 }
 
 function on_activate({ give_feedback }) {
