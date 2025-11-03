@@ -13,6 +13,7 @@ import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
 import * as Signals from "resource:///org/gnome/shell/misc/signals.js";
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
@@ -160,7 +161,14 @@ function icon_should_be_visible(microphone_active) {
 
 function show_osd(text, muted, level) {
   const icon = Gio.Icon.new_for_string(get_icon_name(muted));
-  Main.osdWindowManager.showAll(icon, text, level);
+
+  const shellVersion = Number(Config.PACKAGE_VERSION.split(".")[0]);
+  if (shellVersion >= 49) {
+    Main.osdWindowManager.showAll(icon, text, level);
+  } else {
+    const monitor = -1;
+    Main.osdWindowManager.show(monitor, icon, text, level);
+  }
 }
 
 function on_activate({ give_feedback }) {
