@@ -7,6 +7,7 @@ import Meta from "gi://Meta";
 import Shell from "gi://Shell";
 import Gvc from "gi://Gvc";
 import GObject from "gi://GObject";
+import Clutter from "gi://Clutter";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
@@ -128,14 +129,27 @@ const MicrophonePanelButton = GObject.registerClass(
         style_class: "system-status-icon",
       });
       this.add_child(this.icon);
-      this.connect("button-press-event", (_, event) => {
-        if (event.get_button() === 3) {
-          // Right click.
-          extension.openPreferences();
-        } else {
-          on_activate({ give_feedback: false });
-        }
-      });
+
+      const shellVersion = Number(Config.PACKAGE_VERSION.split(".")[0]);
+      if (shellVersion >= 50) {
+        this._clickGesture.connect('recognize', (gesture) => {
+          if (gesture.get_button() == Clutter.BUTTON_SECONDARY) {
+            // Right click.
+            extension.openPreferences();
+          } else {
+            on_activate({ give_feedback: false });
+          }
+        });
+      } else {
+        this.connect("button-press-event", (_, event) => {
+          if (event.get_button() === 3) {
+            // Right click.
+            extension.openPreferences();
+          } else {
+            on_activate({ give_feedback: false });
+          }
+        });
+      }
     }
   },
 );
