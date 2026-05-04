@@ -72,6 +72,37 @@ export default class extends ExtensionPreferences {
       })(),
     );
 
+    // keybinding mode row
+    group.add(
+      (() => {
+        const model = new Gio.ListStore({ item_type: KeyValuePair });
+        model.splice(0, 0, [
+          new KeyValuePair({ key: "auto", value: "Auto" }),
+          new KeyValuePair({ key: "push-to-talk", value: "Push to talk" }),
+          new KeyValuePair({ key: "push-to-mute", value: "Push to mute" }),
+          new KeyValuePair({ key: "toggle", value: "Toggle" }),
+        ]);
+        const modeRow = new Adw.ComboRow({
+          title: "Mode",
+          subtitle: "Auto: tap to toggle, hold for push-to-talk or push-to-mute",
+          model: model,
+          expression: new Gtk.PropertyExpression(KeyValuePair, null, "value"),
+        });
+        const currentMode = settings.get_string("keybinding-mode");
+        for (let i = 0; i < model.n_items; i++) {
+          if (model.get_item(i).key === currentMode) {
+            modeRow.selected = i;
+            break;
+          }
+        }
+        modeRow.connect("notify::selected-item", () => {
+          const selected = modeRow.selected_item;
+          if (selected) settings.set_string("keybinding-mode", selected.key);
+        });
+        return modeRow;
+      })(),
+    );
+
     group = new Adw.PreferencesGroup({
       title: "Other",
     });

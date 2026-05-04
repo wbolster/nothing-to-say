@@ -26,5 +26,16 @@
       <summary>Play sound when muting and unmuting</summary>
       <description>Play sounds when the microphone is muted and unmuted.</description>
     </key>
+    <key name="keybinding-mode" type="s">
+      <choices>
+        <choice value="auto"/>
+        <choice value="push-to-talk"/>
+        <choice value="push-to-mute"/>
+        <choice value="toggle"/>
+      </choices>
+      <default>'auto'</default>
+      <summary>Keybinding mode</summary>
+      <description>auto: tap to toggle, hold for push-to-talk or push-to-mute; push-to-talk: hold to unmute, release to mute; push-to-mute: hold to mute, release to unmute; toggle: tap to toggle only.</description>
+    </key>
   </schema>
 </schemalist>

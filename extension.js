@@ -216,6 +216,20 @@ function toggle_mute(mute, give_feedback) {
   });
 }
 
+function set_mute(mute, give_feedback) {
+  microphone.muted = mute;
+  if (give_feedback) {
+    show_osd(null, mute, mute ? 0 : microphone.level);
+  }
+  if (settings.get_boolean("play-feedback-sounds")) {
+    if (mute) {
+      audio_player.play_off();
+    } else {
+      audio_player.play_on();
+    }
+  }
+}
+
 export default class extends Extension {
   enable() {
     settings = this.getSettings();
@@ -247,18 +261,52 @@ export default class extends Extension {
     microphone.connect("notify::muted", () => {
       panel_button.icon.icon_name = get_icon_name(microphone.muted);
     });
-    Main.wm.addKeybinding(
-      KEYBINDING_KEY_NAME,
-      settings,
-      Meta.KeyBindingFlags.NONE,
-      Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
-      () => {
-        on_activate({ give_feedback: settings.get_boolean("show-osd") });
-      },
-    );
+    this._addKeybinding();
+    settings.connect("changed::keybinding-mode", () => {
+      Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
+      this._addKeybinding();
+    });
     settings.connect("changed::icon-visibility", () => {
       panel_button.visible = icon_should_be_visible(microphone.active);
     });
+  }
+
+  _addKeybinding() {
+    const mode = settings.get_string("keybinding-mode");
+    const give_feedback = () => settings.get_boolean("show-osd");
+
+    if (mode === "push-to-talk" || mode === "push-to-mute") {
+      Main.wm.addKeybinding(
+        KEYBINDING_KEY_NAME,
+        settings,
+        Meta.KeyBindingFlags.IGNORE_AUTOREPEAT | Meta.KeyBindingFlags.TRIGGER_RELEASE,
+        Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+        (_display, _window, event) => {
+          const press = event.type() === Clutter.EventType.KEY_PRESS;
+          if (mode === "push-to-talk") {
+            set_mute(!press, give_feedback());
+          } else {
+            set_mute(press, give_feedback());
+          }
+        },
+      );
+    } else {
+      Main.wm.addKeybinding(
+        KEYBINDING_KEY_NAME,
+        settings,
+        mode === "toggle"
+          ? Meta.KeyBindingFlags.IGNORE_AUTOREPEAT
+          : Meta.KeyBindingFlags.NONE,
+        Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+        () => {
+          if (mode === "toggle") {
+            set_mute(!microphone.muted, give_feedback());
+          } else {
+            on_activate({ give_feedback: give_feedback() });
+          }
+        },
+      );
+    }
   }
 
   disable() {
