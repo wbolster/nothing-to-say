@@ -14,7 +14,7 @@ import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
 import * as Signals from "resource:///org/gnome/shell/misc/signals.js";
-import * as Config from 'resource:///org/gnome/shell/misc/config.js';
+import * as Config from "resource:///org/gnome/shell/misc/config.js";
 
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
@@ -132,7 +132,7 @@ const MicrophonePanelButton = GObject.registerClass(
 
       const shellVersion = Number(Config.PACKAGE_VERSION.split(".")[0]);
       if (shellVersion >= 50) {
-        this._clickGesture.connect('recognize', (gesture) => {
+        this._clickGesture.connect("recognize", (gesture) => {
           if (gesture.get_button() == Clutter.BUTTON_SECONDARY) {
             // Right click.
             extension.openPreferences();
