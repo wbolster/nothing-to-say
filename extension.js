@@ -274,14 +274,14 @@ export default class extends Extension {
   _addKeybinding() {
     const mode = settings.get_string("keybinding-mode");
     const give_feedback = () => settings.get_boolean("show-osd");
-
+    const actionMode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
     if (mode === "push-to-talk" || mode === "push-to-mute") {
       Main.wm.addKeybinding(
         KEYBINDING_KEY_NAME,
         settings,
         Meta.KeyBindingFlags.IGNORE_AUTOREPEAT |
           Meta.KeyBindingFlags.TRIGGER_RELEASE,
-        Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+        actionMode,
         (_display, _window, event) => {
           const press = event.type() === Clutter.EventType.KEY_PRESS;
           if (mode === "push-to-talk") {
@@ -298,7 +298,7 @@ export default class extends Extension {
         mode === "toggle"
           ? Meta.KeyBindingFlags.IGNORE_AUTOREPEAT
           : Meta.KeyBindingFlags.NONE,
-        Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+        actionMode,
         () => {
           if (mode === "toggle") {
             set_mute(!microphone.muted, give_feedback());
