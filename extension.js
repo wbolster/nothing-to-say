@@ -14,7 +14,6 @@ import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
 import * as Signals from "resource:///org/gnome/shell/misc/signals.js";
-import * as Config from "resource:///org/gnome/shell/misc/config.js";
 
 const EXCLUDED_APPLICATION_IDS = [
   "org.gnome.VolumeControl",
