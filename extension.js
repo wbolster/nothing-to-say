@@ -129,27 +129,14 @@ const MicrophonePanelButton = GObject.registerClass(
         style_class: "system-status-icon",
       });
       this.add_child(this.icon);
-
-      const shellVersion = Number(Config.PACKAGE_VERSION.split(".")[0]);
-      if (shellVersion >= 50) {
-        this._clickGesture.connect("recognize", (gesture) => {
-          if (gesture.get_button() == Clutter.BUTTON_SECONDARY) {
-            // Right click.
-            extension.openPreferences();
-          } else {
-            on_activate({ give_feedback: false });
-          }
-        });
-      } else {
-        this.connect("button-press-event", (_, event) => {
-          if (event.get_button() === 3) {
-            // Right click.
-            extension.openPreferences();
-          } else {
-            on_activate({ give_feedback: false });
-          }
-        });
-      }
+      this._clickGesture.connect("recognize", (gesture) => {
+        if (gesture.get_button() == Clutter.BUTTON_SECONDARY) {
+          // Right click.
+          extension.openPreferences();
+        } else {
+          on_activate({ give_feedback: false });
+        }
+      });
     }
   },
 );
@@ -174,15 +161,11 @@ function icon_should_be_visible(microphone_active) {
 }
 
 function show_osd(text, muted, level) {
-  const icon = Gio.Icon.new_for_string(get_icon_name(muted));
-
-  const shellVersion = Number(Config.PACKAGE_VERSION.split(".")[0]);
-  if (shellVersion >= 49) {
-    Main.osdWindowManager.showAll(icon, text, level);
-  } else {
-    const monitor = -1;
-    Main.osdWindowManager.show(monitor, icon, text, level);
-  }
+  Main.osdWindowManager.showAll(
+    Gio.Icon.new_for_string(get_icon_name(muted)),
+    text,
+    level,
+  );
 }
 
 function on_activate({ give_feedback }) {
