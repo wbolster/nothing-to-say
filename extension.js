@@ -22,12 +22,6 @@ const EXCLUDED_APPLICATION_IDS = [
 const KEYBINDING_KEY_NAME = "keybinding-toggle-mute";
 const MICROPHONE_ACTIVE_STYLE_CLASS = "screencast-indicator";
 
-let initialised = false; // flag to avoid notifications on startup
-let settings = null;
-let microphone;
-let audio_player;
-let panel_button;
-
 class Microphone extends Signals.EventEmitter {
   constructor() {
     super();
@@ -133,7 +127,7 @@ const MicrophonePanelButton = GObject.registerClass(
           // Right click.
           extension.openPreferences();
         } else {
-          on_activate({ give_feedback: false });
+          extension._on_activate({ give_feedback: false });
         }
       });
     }
@@ -147,18 +141,6 @@ function get_icon_name(muted) {
     : "microphone-sensitivity-high-symbolic";
 }
 
-function icon_should_be_visible(microphone_active) {
-  let setting = settings.get_value("icon-visibility").unpack();
-  switch (setting) {
-    case "always":
-      return true;
-    case "never":
-      return false;
-    default:
-      return microphone.active; // when-recording
-  }
-}
-
 function show_osd(text, muted, level) {
   Main.osdWindowManager.showAll(
     Gio.Icon.new_for_string(get_icon_name(muted)),
@@ -167,142 +149,160 @@ function show_osd(text, muted, level) {
   );
 }
 
-function on_activate({ give_feedback }) {
-  toggle_mute(!microphone.muted, give_feedback);
-}
-
-let toggle_mute_timeout_id = null;
-
-function toggle_mute(mute, give_feedback) {
-  // use a delay before toggling; this makes push-to-talk/mute work
-  if (toggle_mute_timeout_id) {
-    GLib.Source.remove(toggle_mute_timeout_id);
-    if (give_feedback) {
-      // keep osd visible
-      show_osd(null, !mute, mute ? microphone.level : 0);
-    }
-  }
-  toggle_mute_timeout_id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
-    toggle_mute_timeout_id = null;
-    microphone.muted = mute;
-    if (give_feedback) {
-      show_osd(null, mute, mute ? 0 : microphone.level);
-    }
-    if (settings.get_boolean("play-feedback-sounds")) {
-      if (mute) {
-        audio_player.play_off();
-      } else {
-        audio_player.play_on();
-      }
-    }
-  });
-}
-
-function set_mute(mute, give_feedback) {
-  microphone.muted = mute;
-  if (give_feedback) {
-    show_osd(null, mute, mute ? 0 : microphone.level);
-  }
-  if (settings.get_boolean("play-feedback-sounds")) {
-    if (mute) {
-      audio_player.play_off();
-    } else {
-      audio_player.play_on();
-    }
-  }
-}
-
 export default class extends Extension {
   enable() {
-    settings = this.getSettings();
-    microphone = new Microphone();
-    audio_player = new AudioPlayer(this.dir);
-    panel_button = new MicrophonePanelButton(this);
-    panel_button.visible = icon_should_be_visible(microphone.active);
+    this._initialised = false; // flag to avoid notifications on startup
+    this._settings = this.getSettings();
+    this._microphone = new Microphone();
+    this._audio_player = new AudioPlayer(this.dir);
+    this._panel_button = new MicrophonePanelButton(this);
+    this._toggle_mute_timeout_id = null;
+    this._panel_button.visible = this._icon_should_be_visible();
     const indicatorName = `${this.metadata.name} indicator`;
-    Main.panel.addToStatusArea(indicatorName, panel_button, 0, "right");
-    microphone.connect("notify::active", () => {
-      if (microphone.active) {
-        panel_button.icon.add_style_class_name(MICROPHONE_ACTIVE_STYLE_CLASS);
+    Main.panel.addToStatusArea(indicatorName, this._panel_button, 0, "right");
+    this._microphone.connect("notify::active", () => {
+      if (this._microphone.active) {
+        this._panel_button.icon.add_style_class_name(
+          MICROPHONE_ACTIVE_STYLE_CLASS,
+        );
       } else {
-        panel_button.icon.remove_style_class_name(
+        this._panel_button.icon.remove_style_class_name(
           MICROPHONE_ACTIVE_STYLE_CLASS,
         );
       }
-      panel_button.visible = icon_should_be_visible(microphone.active);
+      this._panel_button.visible = this._icon_should_be_visible();
       if (
-        settings.get_boolean("show-osd") &&
-        (initialised || microphone.active)
+        this._settings.get_boolean("show-osd") &&
+        (this._initialised || this._microphone.active)
       )
         show_osd(
-          microphone.active ? "Microphone activated" : "Microphone deactivated",
-          microphone.muted,
+          this._microphone.active
+            ? "Microphone activated"
+            : "Microphone deactivated",
+          this._microphone.muted,
         );
-      initialised = true;
+      this._initialised = true;
     });
-    microphone.connect("notify::muted", () => {
-      panel_button.icon.icon_name = get_icon_name(microphone.muted);
+    this._microphone.connect("notify::muted", () => {
+      this._panel_button.icon.icon_name = get_icon_name(this._microphone.muted);
     });
     this._addKeybinding();
-    settings.connect("changed::keybinding-mode", () => {
+    this._settings.connect("changed::keybinding-mode", () => {
       Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
       this._addKeybinding();
     });
-    settings.connect("changed::icon-visibility", () => {
-      panel_button.visible = icon_should_be_visible(microphone.active);
+    this._settings.connect("changed::icon-visibility", () => {
+      this._panel_button.visible = this._icon_should_be_visible();
     });
   }
 
+  _icon_should_be_visible() {
+    let setting = this._settings.get_value("icon-visibility").unpack();
+    switch (setting) {
+      case "always":
+        return true;
+      case "never":
+        return false;
+      default:
+        return this._microphone.active; // when-recording
+    }
+  }
+
+  _on_activate({ give_feedback }) {
+    this._toggle_mute(!this._microphone.muted, give_feedback);
+  }
+
+  _toggle_mute(mute, give_feedback) {
+    // use a delay before toggling; this makes push-to-talk/mute work
+    if (this._toggle_mute_timeout_id) {
+      GLib.Source.remove(this._toggle_mute_timeout_id);
+      if (give_feedback) {
+        // keep osd visible
+        show_osd(null, !mute, mute ? this._microphone.level : 0);
+      }
+    }
+    this._toggle_mute_timeout_id = GLib.timeout_add(
+      GLib.PRIORITY_DEFAULT,
+      100,
+      () => {
+        this._toggle_mute_timeout_id = null;
+        this._set_mute(mute, give_feedback);
+        return GLib.SOURCE_REMOVE;
+      },
+    );
+  }
+
+  _set_mute(mute, give_feedback) {
+    this._microphone.muted = mute;
+    this._show_mute_feedback(mute, give_feedback);
+  }
+
+  _show_mute_feedback(mute, give_feedback) {
+    if (give_feedback) {
+      show_osd(null, mute, mute ? 0 : this._microphone.level);
+    }
+    if (this._settings.get_boolean("play-feedback-sounds")) {
+      if (mute) {
+        this._audio_player.play_off();
+      } else {
+        this._audio_player.play_on();
+      }
+    }
+  }
+
   _addKeybinding() {
-    const mode = settings.get_string("keybinding-mode");
-    const give_feedback = () => settings.get_boolean("show-osd");
-    const actionMode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
+    const mode = this._settings.get_string("keybinding-mode");
+    const give_feedback = () => this._settings.get_boolean("show-osd");
+    const action_mode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
+    let flags;
+    let handler;
+
     if (mode === "push-to-talk" || mode === "push-to-mute") {
-      Main.wm.addKeybinding(
-        KEYBINDING_KEY_NAME,
-        settings,
+      flags =
         Meta.KeyBindingFlags.IGNORE_AUTOREPEAT |
-          Meta.KeyBindingFlags.TRIGGER_RELEASE,
-        actionMode,
-        (_display, _window, event) => {
-          const press = event.type() === Clutter.EventType.KEY_PRESS;
-          if (mode === "push-to-talk") {
-            set_mute(!press, give_feedback());
-          } else {
-            set_mute(press, give_feedback());
-          }
-        },
-      );
+        Meta.KeyBindingFlags.TRIGGER_RELEASE;
+      handler = (_display, _window, event) => {
+        const press = event.type() === Clutter.EventType.KEY_PRESS;
+        if (mode === "push-to-talk") {
+          this._set_mute(!press, give_feedback());
+        } else {
+          this._set_mute(press, give_feedback());
+        }
+      };
     } else {
-      Main.wm.addKeybinding(
-        KEYBINDING_KEY_NAME,
-        settings,
+      flags =
         mode === "toggle"
           ? Meta.KeyBindingFlags.IGNORE_AUTOREPEAT
-          : Meta.KeyBindingFlags.NONE,
-        actionMode,
-        () => {
-          if (mode === "toggle") {
-            set_mute(!microphone.muted, give_feedback());
-          } else {
-            on_activate({ give_feedback: give_feedback() });
-          }
-        },
-      );
+          : Meta.KeyBindingFlags.NONE;
+      handler = () => {
+        if (mode === "toggle") {
+          this._set_mute(!this._microphone.muted, give_feedback());
+        } else {
+          this._on_activate({ give_feedback: give_feedback() });
+        }
+      };
     }
+    Main.wm.addKeybinding(
+      KEYBINDING_KEY_NAME,
+      this._settings,
+      flags,
+      action_mode,
+      handler,
+    );
   }
 
   disable() {
     Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
-    Main.panel._rightBox.remove_child(panel_button);
-    settings = null;
-    microphone.destroy();
-    microphone = null;
-    panel_button.destroy();
-    panel_button = null;
-    if (toggle_mute_timeout_id) {
-      GLib.Source.remove(toggle_mute_timeout_id);
-      toggle_mute_timeout_id = null;
+    Main.panel._rightBox.remove_child(this._panel_button);
+    if (this._toggle_mute_timeout_id) {
+      GLib.Source.remove(this._toggle_mute_timeout_id);
+      this._toggle_mute_timeout_id = null;
     }
+    this._microphone.destroy();
+    this._microphone = null;
+    this._panel_button.destroy();
+    this._panel_button = null;
+    this._audio_player = null;
+    this._settings = null;
   }
 }
