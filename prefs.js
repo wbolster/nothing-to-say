@@ -39,8 +39,7 @@ export default class extends ExtensionPreferences {
     window.add(page);
 
     let group = new Adw.PreferencesGroup({
-      title: "Keybindings",
-      description: "Keybindings for muting and unmuting",
+      title: "Keyboard shortcuts",
     });
     page.add(group);
 
