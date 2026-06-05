@@ -48,7 +48,7 @@ export default class extends ExtensionPreferences {
     group.add(
       (() => {
         const accel =
-          settings.get_strv("keybinding-toggle-mute")[0] || "<Alt>backslash";
+          settings.get_strv("keybinding-toggle-mute")[0] || "<Super>backslash";
         const keybindingsRow = new Adw.EntryRow({
           title: "Mute/Unmute",
           show_apply_button: true,
@@ -62,7 +62,8 @@ export default class extends ExtensionPreferences {
         resetButton.connect("clicked", () => {
           settings.reset("keybinding-toggle-mute");
           keybindingsRow.text =
-            settings.get_strv("keybinding-toggle-mute")[0] || "<Alt>backslash";
+            settings.get_strv("keybinding-toggle-mute")[0] ||
+            "<Super>backslash";
         });
         keybindingsRow.add_suffix(resetButton);
         keybindingsRow.connect("apply", () => {
