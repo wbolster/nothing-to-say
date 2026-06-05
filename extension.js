@@ -27,30 +27,39 @@ class Microphone extends Signals.EventEmitter {
     super();
     this.active = null;
     this.stream = null;
-    this.muted_changed_id = 0;
     this.mixer_control = new Gvc.MixerControl({ name: "Nothing to say" });
     this.mixer_control.open();
     const refresh_cb = () => {
       this.refresh();
     };
-    this.mixer_control.connect("default-source-changed", refresh_cb);
-    this.mixer_control.connect("stream-added", refresh_cb);
-    this.mixer_control.connect("stream-removed", refresh_cb);
+    this.mixer_control.connectObject(
+      "default-source-changed",
+      refresh_cb,
+      "stream-added",
+      refresh_cb,
+      "stream-removed",
+      refresh_cb,
+      this,
+    );
     this.refresh();
   }
 
   refresh() {
     // based on gnome-shell volume control
-    if (this.stream && this.muted_changed_id) {
-      this.stream.disconnect(this.muted_changed_id);
+    if (this.stream) {
+      this.stream.disconnectObject(this);
     }
     let was_active = this.active;
     this.active = false;
     this.stream = this.mixer_control.get_default_source();
     if (this.stream) {
-      this.muted_changed_id = this.stream.connect("notify::is-muted", () => {
-        this.notify_muted();
-      });
+      this.stream.connectObject(
+        "notify::is-muted",
+        () => {
+          this.notify_muted();
+        },
+        this,
+      );
       let recording_apps = this.mixer_control.get_source_outputs();
       for (let i = 0; i < recording_apps.length; i++) {
         let output_stream = recording_apps[i];
@@ -66,6 +75,12 @@ class Microphone extends Signals.EventEmitter {
   }
 
   destroy() {
+    this.disconnect_muted_changed_signal();
+    if (this.stream) {
+      this.stream.disconnectObject(this);
+      this.stream = null;
+    }
+    this.mixer_control.disconnectObject(this);
     this.mixer_control.close();
   }
 
@@ -122,14 +137,18 @@ const MicrophonePanelButton = GObject.registerClass(
         style_class: "system-status-icon",
       });
       this.add_child(this.icon);
-      this._clickGesture.connect("recognize", (gesture) => {
-        if (gesture.get_button() == Clutter.BUTTON_SECONDARY) {
-          // Right click.
-          extension.openPreferences();
-        } else {
-          extension._on_activate({ give_feedback: false });
-        }
-      });
+      this._clickGesture.connectObject(
+        "recognize",
+        (gesture) => {
+          if (gesture.get_button() == Clutter.BUTTON_SECONDARY) {
+            // Right click.
+            extension.openPreferences();
+          } else {
+            extension._on_activate({ give_feedback: false });
+          }
+        },
+        this,
+      );
     }
   },
 );
@@ -160,40 +179,52 @@ export default class extends Extension {
     this._panel_button.visible = this._icon_should_be_visible();
     const indicatorName = `${this.metadata.name} indicator`;
     Main.panel.addToStatusArea(indicatorName, this._panel_button, 0, "right");
-    this._microphone.connect("notify::active", () => {
-      if (this._microphone.active) {
-        this._panel_button.icon.add_style_class_name(
-          MICROPHONE_ACTIVE_STYLE_CLASS,
-        );
-      } else {
-        this._panel_button.icon.remove_style_class_name(
-          MICROPHONE_ACTIVE_STYLE_CLASS,
-        );
-      }
-      this._panel_button.visible = this._icon_should_be_visible();
-      if (
-        this._settings.get_boolean("show-osd") &&
-        (this._initialised || this._microphone.active)
-      )
-        show_osd(
-          this._microphone.active
-            ? "Microphone activated"
-            : "Microphone deactivated",
+    this._microphone.connectObject(
+      "notify::active",
+      () => {
+        if (this._microphone.active) {
+          this._panel_button.icon.add_style_class_name(
+            MICROPHONE_ACTIVE_STYLE_CLASS,
+          );
+        } else {
+          this._panel_button.icon.remove_style_class_name(
+            MICROPHONE_ACTIVE_STYLE_CLASS,
+          );
+        }
+        this._panel_button.visible = this._icon_should_be_visible();
+        if (
+          this._settings.get_boolean("show-osd") &&
+          (this._initialised || this._microphone.active)
+        )
+          show_osd(
+            this._microphone.active
+              ? "Microphone activated"
+              : "Microphone deactivated",
+            this._microphone.muted,
+          );
+        this._initialised = true;
+      },
+      "notify::muted",
+      () => {
+        this._panel_button.icon.icon_name = get_icon_name(
           this._microphone.muted,
         );
-      this._initialised = true;
-    });
-    this._microphone.connect("notify::muted", () => {
-      this._panel_button.icon.icon_name = get_icon_name(this._microphone.muted);
-    });
+      },
+      this,
+    );
     this._addKeybinding();
-    this._settings.connect("changed::keybinding-mode", () => {
-      Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
-      this._addKeybinding();
-    });
-    this._settings.connect("changed::icon-visibility", () => {
-      this._panel_button.visible = this._icon_should_be_visible();
-    });
+    this._settings.connectObject(
+      "changed::keybinding-mode",
+      () => {
+        Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
+        this._addKeybinding();
+      },
+      "changed::icon-visibility",
+      () => {
+        this._panel_button.visible = this._icon_should_be_visible();
+      },
+      this,
+    );
   }
 
   _icon_should_be_visible() {
@@ -292,6 +323,8 @@ export default class extends Extension {
   }
 
   disable() {
+    this._microphone.disconnectObject(this);
+    this._settings.disconnectObject(this);
     Main.wm.removeKeybinding(KEYBINDING_KEY_NAME);
     Main.panel._rightBox.remove_child(this._panel_button);
     if (this._toggle_mute_timeout_id) {
