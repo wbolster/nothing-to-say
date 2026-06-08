@@ -75,7 +75,6 @@ class Microphone extends Signals.EventEmitter {
   }
 
   destroy() {
-    this.disconnect_muted_changed_signal();
     if (this.stream) {
       this.stream.disconnectObject(this);
       this.stream = null;
